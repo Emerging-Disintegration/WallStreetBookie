@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "stock-app"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "util", from = "/Users/book/Documents/wallStBookie/stock-app" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2.3"
+yahoo-fin = "^0.8.9.1"
+flet = "^0.26.0"
+ipykernel = "^6.29.5"
+pandas-datareader = "^0.10.0"
+yfinance = "^0.2.53"
+beautifulsoup4 = "^4.13.3"
+selenium = "^4.29.0"
+matplotlib = "^3.10.1"
+freeoptionschain = "^0.8"
+simpledatatable = "^0.3.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

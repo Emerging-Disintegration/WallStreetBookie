@@ -1,0 +1,33 @@
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment
+venv/
+env/
+
+# Ignore Flet build files
+build/
+dist/
+
+# Ignore log files
+*.log
+
+# Ignore assets that shouldn't be tracked
+assets/*.tmp
+assets/*.bak
+
+# Ignore IDE-specific files (e.g., VS Code)
+.vscode/
+*.code-workspace
+
+# Ignore other temporary files
+*.swp
+*.swo
+*.tmp
+
+# Ignore test files
+src/test/testing.ipynb
