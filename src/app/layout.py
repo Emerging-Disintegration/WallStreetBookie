@@ -1,6 +1,7 @@
 import flet as ft
-from src.util.search import find_gain_stock
+from util.search import find_gain_stock
 import pandas as pd
+from util.stock_info import live_price, prev_price, daily_gain, get_option_stats
 
 primary_color = '#8F87F1'
 secondary_color = '#C68EFD'
@@ -53,16 +54,27 @@ class CardRow(ft.Row):
         ]
         self.alignment = ft.MainAxisAlignment.CENTER
         self.spacing = 30
+class StockStats(ft.Column):
+    def __init__(self, stock):
+        super().__init__()
+        self.width = 165
+        self.stock = stock
+        self.live_price = live_price(stock)
+        self.prev_price = prev_price(stock)
+        self.daily_gain = daily_gain(stock)
+        self.option_stats = get_option_stats(stock)
+
 
 class StockCard(ft.Container):
-    def __init__(self):
+    def __init__(self, stock):
         super().__init__()
         # self.stock = stock
         self.bgcolor = secondary_color
         self.border_radius = 8
         self.width = 175
         self.height = 175
-        # self.alignment = ft.alignment.center 
+        self.alignment = ft.alignment.center 
+        self.content = StockStats(stock)
 
 class Vix:
     def __init__(self):
@@ -141,6 +153,8 @@ class SearchBox(ft.TextField):
         self.label_style = ft.TextStyle(color = text_color, size = 12)
         self.cursor_color = text_color
         self.cursor_height = 15
+        self.cursor_radius = 8
+        self.text_vertical_align = ft.VerticalAlignment.START
         
 class SearchButton(ft.FilledButton):
     def __init__(self):
@@ -155,7 +169,7 @@ class SearchButton(ft.FilledButton):
 class SearchRow(ft.Row):
     def __init__(self):
         super().__init__()
-        self.page = ft.Page()
+        # self.page = ft.Page()
         self.width = 575
         self.height = 60
         self.ticker_box = SearchBox('Ticker')
@@ -169,14 +183,14 @@ class SearchRow(ft.Row):
             self.search_button
         ] 
 
-    def on_search_click(self, e):
-        ticker = self.ticker_box.value
-        expiration = self.expiration_box.value
-        percent_gain = self.desired_profit_box.value
+    # def on_search_click(self, e):
+    #     ticker = self.ticker_box.value
+    #     expiration = self.expiration_box.value
+    #     percent_gain = self.desired_profit_box.value
 
-        df = find_gain_stock(ticker, percent_gain, expiration)
-        self.page.session.set('search_results', df.to_dict)
-        self.page.go('/search_results')
+    #     df = find_gain_stock(ticker, percent_gain, expiration)
+    #     self.page.session.set('search_results', df.to_dict)
+    #     self.page.go('/search_results')
 
 class SeachContainer(ft.Container):
     def __init__(self):

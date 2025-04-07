@@ -4,8 +4,16 @@ import pandas as pd
 from simpledt import DataFrame
 
 def search_results_page(page: ft.Page):
-    df_dict = page.session.get('df_dict', {})
+    df_dict = page.session.get('search_results')
+    if not df_dict:
+        page.add(ft.Text("No data available to display.", color=text_color))
+        return
+
     df = pd.DataFrame(df_dict)
+    if df.empty:
+        page.add(ft.Text("No data available to display.", color=text_color))
+        return
+
     flet_df = DataFrame(df)
     results_df = flet_df.datatable 
     page.floating_action_button = ft.FloatingActionButton(

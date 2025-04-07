@@ -1,11 +1,12 @@
 [tool.poetry]
-name = "stock-app"
+name = "src"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
-    { include = "util", from = "/Users/book/Documents/wallStBookie/stock-app" }
+    { include = "util" },
+    { include = "app" },
 ]
 
 [tool.poetry.dependencies]
