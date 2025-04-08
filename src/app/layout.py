@@ -1,7 +1,7 @@
 import flet as ft
 from util.search import find_gain_stock
 import pandas as pd
-from util.stock_info import live_price, prev_price, daily_gain, get_option_stats
+from util.stock_info import *
 
 primary_color = '#8F87F1'
 secondary_color = '#C68EFD'
@@ -26,27 +26,37 @@ class AppLayout(ft.Column):
         super().__init__()
         self.card_row = CardRow()
         self.title_section = TitleSection()
-        self.middle_section = MiddleSection()
-        self.search_containeter = SeachContainer()
+        self.middle_row_container = MiddleRowContainer()
+        self.search_container = SeachContainer()
         self.controls = [
             self.title_section, 
              self.card_row,
-             self.middle_section,
-             self.search_containeter
+             self.middle_row_container,
+             self.search_container
         ]
         self.alignment = ft.MainAxisAlignment.CENTER
         self.width = 585
         self.height = 700
-        # self.card_row = CardRow()
-        # self.stock_card = StockCard()
+ 
+
+class TitleSection(ft.Column):
+    def __init__(self):
+        super().__init__()
+        self.title = 'WallStreetBookie'
+        self.alignment = ft.MainAxisAlignment.START
+        self.spacing = 5
+        self.controls = [
+            ft.Text(self.title, font_family = 'Boldonse-Regular', size = 35, color = text_color),
+            ft.Text('Find High-Potential(and High Risk) trades instantly\nYour shortcut to your next WallStreetBet', size=17, color=text_color, weight=300)
+        ]
 
 class CardRow(ft.Row):
     def __init__(self):
         super().__init__()
         # self.container = None
-        self.spy = StockCard()
-        self.qqq = StockCard()
-        self.iwm = StockCard()
+        self.spy = StockCard('SPY')
+        self.qqq = StockCard('QQQ')
+        self.iwm = StockCard('IWM')
         self.controls = [
             self.spy,
             self.qqq,
@@ -54,15 +64,6 @@ class CardRow(ft.Row):
         ]
         self.alignment = ft.MainAxisAlignment.CENTER
         self.spacing = 30
-class StockStats(ft.Column):
-    def __init__(self, stock):
-        super().__init__()
-        self.width = 165
-        self.stock = stock
-        self.live_price = live_price(stock)
-        self.prev_price = prev_price(stock)
-        self.daily_gain = daily_gain(stock)
-        self.option_stats = get_option_stats(stock)
 
 
 class StockCard(ft.Container):
@@ -76,21 +77,43 @@ class StockCard(ft.Container):
         self.alignment = ft.alignment.center 
         self.content = StockStats(stock)
 
-class Vix:
-    def __init__(self):
-        pass
+
+class StockStats(ft.Column):
+    def __init__(self, stock):
+        super().__init__()
+        self.width = 165
+        self.live_price = live_price(stock)
+        self.prev_price = str(prev_price(stock))
+        self.daily_gain = str(daily_gain(stock))
+        self.option_stats = str(get_option_stats(stock))
+        self.controls = [
+            ft.Row(
+                controls = [
+                    ft.Text(stock, size = 25, color = text_color),
+
+                ],
+                alignment = ft.MainAxisAlignment.START
+            ),
+            ft.Row(
+                controls=[
+                    ft.Text(self.live_price, size = 30, color = text_color, expand = True),
+                    ft.Text(self.daily_gain)
+                ],
+                alignment = ft.MainAxisAlignment.CENTER,
+                spacing = 5
+
+            )
+        ]
 
 
-class TitleSection(ft.Column):
+
+
+class Vix(ft.Text):
     def __init__(self):
         super().__init__()
-        self.title = 'WallStreetBookie'
-        self.alignment = ft.MainAxisAlignment.START
-        self.spacing = 5
-        self.controls = [
-            ft.Text(self.title, font_family= 'Boldonse-Regular', size=35, color=text_color),
-            ft.Text('Find High-Potential(and High Risk) trades instantly\nYour shortcut to your next WallStreetBet', size=17, color=text_color, weight=300)
-        ]
+        self.text = str(get_vix())
+
+
 
 # class SideButton(ft.CupertinoSegmentedButton):
 #     def __inti__(self):
@@ -105,12 +128,23 @@ class TitleSection(ft.Column):
 #             ft.Text('Any')
 #         ]
 
+
+class MiddleRowContainer(ft.Container):
+    def __init__(self):
+        super().__init__()
+        self.bgcolor = primary_color
+        self.height = 85
+        self.width = 585
+        self.alignment = ft.alignment.bottom_center
+        self.middle_row = MiddleRow()
+        self.content = self.middle_row
+
+
 class MiddleRow(ft.Row):
     def __init__(self):
         super().__init__()
-        # self.bgcolor = primary_color
         self.width = 585
-        # self.segmented_button = None
+        self.vix = Vix()
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
         self.controls = [
             ft.CupertinoSlidingSegmentedButton(
@@ -122,22 +156,38 @@ class MiddleRow(ft.Row):
                 selected_index = 1,
                 thumb_color = accent_color_1,
                 bgcolor = primary_color
-                
-                
             ),
-            ft.Text('VIX: 23', size=30)
+            self.vix.text
         ]
 
-
-class MiddleSection(ft.Container):
+class SeachContainer(ft.Container):
     def __init__(self):
         super().__init__()
-        self.bgcolor = primary_color
-        self.height = 85
         self.width = 585
-        self.alignment = ft.alignment.bottom_center
-        self.middle_row = MiddleRow()
-        self.content = self.middle_row
+        self.height = 65
+        self.bgcolor = secondary_color
+        self.alignment = ft.Alignment(1, 0)
+        self.search_row = SearchRow()
+        self.content = self.search_row
+        self.border_radius = 8
+
+
+class SearchRow(ft.Row):
+    def __init__(self):
+        super().__init__()
+        # self.page = ft.Page()
+        self.width = 575
+        self.height = 60
+        self.ticker_box = SearchBox('Ticker')
+        self.expiration_box = SearchBox('Expiration')
+        self.desired_profit_box = SearchBox('Desired Profit')
+        self.search_button = SearchButton()
+        self.controls = [
+            self.ticker_box,
+            self.expiration_box,
+            self.desired_profit_box,
+            self.search_button
+        ] 
 
 class SearchBox(ft.TextField):
     def __init__(self, label: str):
@@ -166,22 +216,6 @@ class SearchButton(ft.FilledButton):
         self.bgcolor = accent_color_1
         self.style = ft.ButtonStyle(shape = ft.RoundedRectangleBorder(radius = 8))
 
-class SearchRow(ft.Row):
-    def __init__(self):
-        super().__init__()
-        # self.page = ft.Page()
-        self.width = 575
-        self.height = 60
-        self.ticker_box = SearchBox('Ticker')
-        self.expiration_box = SearchBox('Expiration')
-        self.desired_profit_box = SearchBox('Desired Profit')
-        self.search_button = SearchButton()
-        self.controls = [
-            self.ticker_box,
-            self.expiration_box,
-            self.desired_profit_box,
-            self.search_button
-        ] 
 
     # def on_search_click(self, e):
     #     ticker = self.ticker_box.value
@@ -192,13 +226,3 @@ class SearchRow(ft.Row):
     #     self.page.session.set('search_results', df.to_dict)
     #     self.page.go('/search_results')
 
-class SeachContainer(ft.Container):
-    def __init__(self):
-        super().__init__()
-        self.width = 585
-        self.height = 65
-        self.bgcolor = secondary_color
-        self.alignment = ft.Alignment(1, 0)
-        self.search_row = SearchRow()
-        self.content = self.search_row
-        self.border_radius = 8
