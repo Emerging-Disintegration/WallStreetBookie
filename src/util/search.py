@@ -5,6 +5,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime, time
 from yahoo_fin.options import get_options_chain
+import requests
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 chrome_options = Options()
 chrome_options.add_argument('--headless')
@@ -82,74 +87,61 @@ def apply_call(df):
 def apply_put(df):
     return in_the_money_premium(df, df['Strike'], df['t'], df['iv'], option_type='put')
 
-# def find_gain(exch: list[str], percent_gain: float, exp: str)-> pd.DataFrame:
-    
-#     # Convert the formatting of the expiration date for the API request
-#     exp = exp.replace('/', '%2F')
-    
-#     # Set variable for the converted percent gain value 
-#     times_gain = percent_gain_to_integer(percent_gain)
-   
-#     # List to store DataFrames for each stock
-#     gains_list = [] 
+def api_find_gain(stock, percent_gain: float, exp: str, zone ='CT', opt_side= 'any')-> pd.DataFrame:
+    # Get time to expiration in years
+    T = get_t(exp, zone)
+    # Convert the formatting of the expiration date for the API request
+    exp = exp.replace('/', '%2F')
+    # Option chain API key
+    option_chain_api_key = os.getenv('OPTION_CHAIN_API_KEY')
+    url = None
+    # Construct the API URL
+    match opt_side:
+        case 'call':
+            url = None
+        case 'put':
+            url = None
+        case _:
+            url = f'https://api.marketdata.app/v1/options/chain/{stock}/?format=json&expiration={exp}&range=otm&columns=strike%2C%20side%2C%20underlying%2C%20dte%2C%20ask%2C%20underlyingPrice%2C%20iv&token={option_chain_api_key}'
+    # Set variable for the converted percent gain value 
+    times_gain = percent_gain_to_integer(percent_gain)
+    # Send a GET request to the API
+    response = requests.request('GET', url)
+    chain = response.text
+    # Parse the response as JSON and create a DataFrame
+    df = pd.read_json(chain)
 
-#     # Iterate over each stock in the exchange list
-#     for stock in exch:
-#         # Construct the API URL
-#         url = f'https://api.marketdata.app/v1/options/chain/{stock}/?format=json&expiration={exp}&range=otm&columns=strike%2C%20side%2C%20underlying%2C%20dte%2C%20ask%2C%20underlyingPrice%2C%20iv&token=cGxfN2Nra1FLVHNoQ2ttSVFDVEJudEs0a1JEblJwNGpvUXVfTmNUOVdvZz0'
-#         # Send a GET request to the API
-#         response = requests.request('GET', url)
-#         chain = response.text
+    # Calculate time to expiration in years
+    df['t'] = T
+    # Calculate in-the-money premium for each option
+    df['inTheMoneyPrice'] = df.apply(lambda x: apply_call(x) if x['side'] == 'call' else apply_put(x), axis=1)
+    df['inTheMoneyPrice'] = df['inTheMoneyPrice'].round(2)
+    # Calculate times gain for each option
+    df['timesGain'] = df['inTheMoneyPrice'] / df['ask']
+    df['timesGain'] = df['timesGain'].round(2)
+    # Filter options with times gain greater than the desired value
+    df = df[df['timesGain'] >= times_gain]
+    # Sort options by times gain in ascending order
+    df.sort_values(by='timesGain', ascending=True, inplace=True)
+    # Drop all of the rows after the first 10
+    df.drop(df.index[10:], inplace=True)
+    # Convert times gain back to percent gain 
+    df['percentGain'] = df['timesGain'].apply(lambda x: integer_to_percent_gain(x)).round(2)
+    df['percentGain'] = df['percentGain'].apply(lambda x: str(x) + '%')
+    df['iv'] = df['iv'].round(1)
+    df['iv'] = df['iv'].apply(lambda x: str(x * 100) + '%')
+    # Drop the time to expiration, and times gain columns
+    df.drop(columns=['t', 'timesGain'], inplace=True)
+    df.rename(
+        columns={
+            'iv': 'Implied Volatility',
+            'inTheMoneyPrice': 'ITM Price',
+            'percentGain': 'Percent Gain'
+        }, inplace=True)
+    return df
 
-#         # Try to parse the response as JSON and create a DataFrame
-#         try:
-#             df = pd.read_json(chain)
-#         except:
-#             continue  # Skip to the next stock if parsing fails
-
-#         # Try to calculate the in-the-money premium and times gain for each option
-#         try:
-#             # Calculate time to expiration in years
-#             df['t'] = df['dte'].map(lambda x: float(x/365.25))
-
-#             # Calculate in-the-money premium for each option
-#             df['inTheMoneyPrice'] = df.apply(lambda x: apply_call(x) if x['side'] =='call' else apply_put(x), axis=1)
-#             df['inTheMoneyPrice'] = df['inTheMoneyPrice'].round(2)
-
-#             # Calculate times gain for each option
-#             df['timesGain'] = df['inTheMoneyPrice'] / df['ask']
-#             df['timesGain'] = df['timesGain'].round(2)
-
-#             # Filter options with times gain greater than the desired value
-#             df = df[df['timesGain'] >= times_gain]
-#             #cSort options by times gain in ascending order
-#             df.sort_values(by='timesGain', ascending=True, inplace=True)
-#             # Drop all of the rows after the first 10
-#             df.drop(df.index[10:], inplace=True)
-#             # Convert times gain back to percent gain 
-#             df['percentGain'] = df['timesGain'].apply(lambda x: integer_to_percent_gain(x)).round(2)
-#             df['percentGain'] = df['percentGain'].apply(lambda x: str(x) + '%')
-#             df['iv'] = df['iv'].round(1)
-#             df['iv']= df['iv'].apply(lambda x: str(x * 100) + '%')
-#             # Drop the time to expiration, and times gain columns
-#             df.drop(columns=['t','timesGain'], inplace=True)
-
-#             # Append the filtered DataFrame to the list
-#             gains_list.append(df)
-#         except:
-#             continue  # Skip to the next stock if calculation fails
-
-#     # If no options were found with the given criteria, return a message
-#     if not gains_list:
-#         return 'No options found with the given criteria. Try adjusting the percent gain or expiration range.'
-    
-#     # Return the concatenated DataFrame with the most gains for each stock
-#     gains_df = pd.concat(gains_list)
-
-#     # Reset the index of the concatenated DataFrame
-#     gains_df = gains_df.reset_index(drop=True)
-#     return gains_df
-
+    return df
+################################################################################################
 def find_gain_stock(stock, percent_gain, exp, zone='CT', opt_side='any'):
     times_gain = percent_gain_to_integer(percent_gain)
     T = get_t(exp, zone)

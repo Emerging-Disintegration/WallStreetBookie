@@ -22,6 +22,8 @@ selenium = "^4.29.0"
 matplotlib = "^3.10.1"
 freeoptionschain = "^0.8"
 simpledatatable = "^0.3.4"
+finnhub-python = "^2.4.23"
+python-dotenv = "^1.1.0"
 
 
 [build-system]

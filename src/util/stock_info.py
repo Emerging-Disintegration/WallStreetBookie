@@ -1,4 +1,6 @@
-from FOC import FOC
+import finnhub.client as fh 
+import os 
+from dotenv import load_dotenv
 import re 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -10,23 +12,21 @@ chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 
-api = FOC()
+load_dotenv()
 
-def live_price(stock: str):
-    price = api.get_stock_price(stock)
-    live_price = price.at[0, 'price']
-    return live_price
+api_key = os.getenv('API_KEY')
+api = fh.Client(api_key=api_key)
 
-def prev_price(stock:str):
-    price = api.get_stock_price(stock)
-    prev_price = float(price.at[0, 'previousClose'].replace('$', ''))
-    return prev_price
+def get_current_price(stock: str):
+    quote = api.quote(stock)
+    current_price = quote['c']
+    return str(current_price)
+    
 
-def daily_gain(stock: str):
-    curr_price = live_price(stock)
-    previous_price = prev_price(stock)
-    daily_gain = ((curr_price - previous_price) / previous_price) * 100
-    return str(round(daily_gain, 2)) + '%'
+def get_percent_change(stock: str):
+    quote = api.quote(stock)
+    percent_change = quote['dp']
+    return str(percent_change)
 
 def get_option_stats(ticker: str)-> dict:
     """
