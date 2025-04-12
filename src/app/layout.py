@@ -27,7 +27,7 @@ class AppLayout(ft.Column):
         self.card_row = CardRow()
         self.title_section = TitleSection()
         self.middle_row_container = MiddleRowContainer()
-        self.search_container = SeachContainer()
+        self.search_container = SearchContainer()
         self.controls = [
             self.title_section, 
              self.card_row,
@@ -47,7 +47,7 @@ class TitleSection(ft.Column):
         self.spacing = 5
         self.controls = [
             ft.Text(self.title, font_family = 'Boldonse-Regular', size = 35, color = text_color),
-            ft.Text('Find High-Potential(and High Risk) trades instantly\nYour shortcut to your next WallStreetBet', size=17, color=text_color, weight=300)
+            ft.Text('Find High-Potential(and High Risk) trades instantly\nYour shortcut to your next WallStreetBet', size = 17, color = text_color, weight = 300)
         ]
 
 class CardRow(ft.Row):
@@ -82,10 +82,9 @@ class StockStats(ft.Column):
     def __init__(self, stock):
         super().__init__()
         self.width = 165
-        self.live_price = live_price(stock)
-        self.prev_price = str(prev_price(stock))
-        self.daily_gain = str(daily_gain(stock))
-        self.option_stats = str(get_option_stats(stock))
+        self.current_price = get_current_price(stock)
+        self.percent_change = get_percent_change(stock)
+        self.option_stats = None
         self.controls = [
             ft.Row(
                 controls = [
@@ -96,8 +95,8 @@ class StockStats(ft.Column):
             ),
             ft.Row(
                 controls=[
-                    ft.Text(self.live_price, size = 30, color = text_color, expand = True),
-                    ft.Text(self.daily_gain)
+                    ft.Text(self.current_price, size = 30, color = text_color, expand = True),
+                    ft.Text(self.percent_change)
                 ],
                 alignment = ft.MainAxisAlignment.CENTER,
                 spacing = 5
@@ -157,10 +156,10 @@ class MiddleRow(ft.Row):
                 thumb_color = accent_color_1,
                 bgcolor = primary_color
             ),
-            self.vix.text
+            ft.Text(value = f'VIX: {self.vix.text}', size = 35, color = text_color)
         ]
 
-class SeachContainer(ft.Container):
+class SearchContainer(ft.Container):
     def __init__(self):
         super().__init__()
         self.width = 585
