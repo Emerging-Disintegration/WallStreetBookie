@@ -76,33 +76,58 @@ class StockCard(ft.Container):
         self.height = 175
         self.alignment = ft.alignment.center 
         self.content = StockStats(stock)
+        self.padding = 5
 
 
 class StockStats(ft.Column):
     def __init__(self, stock):
         super().__init__()
         self.width = 165
+        self.card_title = StockCardTitle(stock)
         self.current_price = get_current_price(stock)
         self.percent_change = get_percent_change(stock)
+        self.percent_change_icon = percent_change_icon(self.percent_change)
         self.option_stats = None
         self.controls = [
             ft.Row(
                 controls = [
-                    ft.Text(stock, size = 25, color = text_color),
-
+                    self.card_title,
+                    ft.Row(
+                        controls = [
+                            ft.Text(self.percent_change, size = 15, color = text_color, weight = 300),
+                            self.percent_change_icon,
+                        ],
+                        alignment = ft.MainAxisAlignment.CENTER,
+                        vertical_alignment = ft.MainAxisAlignment.START,
+                        spacing = 5
+                    )
                 ],
-                alignment = ft.MainAxisAlignment.START
+                alignment = ft.MainAxisAlignment.SPACE_BETWEEN
             ),
             ft.Row(
                 controls=[
-                    ft.Text(self.current_price, size = 30, color = text_color, expand = True),
-                    ft.Text(self.percent_change)
+                    ft.Text(self.current_price, size = 30, color = text_color),
                 ],
                 alignment = ft.MainAxisAlignment.CENTER,
-                spacing = 5
+                vertical_alignment = ft.MainAxisAlignment.START,
+            
+            ),
+            ft.Divider(
+                color = accent_color_2,
 
             )
         ]
+
+class StockCardTitle(ft.Container):
+    def __init__(self,stock: str):
+        super().__init__()
+        self.bgcolor = accent_color_1
+        self.stock = stock
+        self.width = 55
+        self.height = 30
+        self.alignment = ft.alignment.center
+        self.border_radius = 8
+        self.content = ft.Text(stock, size = 15, color = text_color, weight = 300)
 
 
 

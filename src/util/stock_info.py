@@ -11,22 +11,33 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
-
+import flet as ft
 load_dotenv()
 
 api_key = os.getenv('API_KEY')
 api = fh.Client(api_key=api_key)
 
-def get_current_price(stock: str):
+def get_current_price(stock: str) -> str:
     quote = api.quote(stock)
     current_price = quote['c']
     return str(current_price)
     
 
-def get_percent_change(stock: str):
+def get_percent_change(stock: str) -> str:
     quote = api.quote(stock)
     percent_change = quote['dp']
-    return str(percent_change)
+    # round to 2 decimal places
+    percent_change = round(percent_change, 2)
+    return f'{percent_change}%'
+
+def percent_change_icon(percent_change: str) -> ft.Icon:
+    if percent_change.startswith('-'):
+        icon = ft.icons.ARROW_DOWNWARD
+        color = ft.colors.RED_400
+    else:
+        icon = ft.icons.ARROW_UPWARD
+        color = ft.colors.GREEN_400
+    return ft.Icon(icon, color = color, size = 20, weight = 200)
 
 def get_option_stats(ticker: str)-> dict:
     """
