@@ -11,23 +11,23 @@ text_color = '#F1E7E7'
 
 
 class BookieApp(ft.Container):
-    def __init__(self):
+    def __init__(self, page: ft.Page):
         super().__init__()
         self.bgcolor = primary_color
         self.width = 1200
         self.height = 750
         self.alignment = ft.alignment.top_center
-        self.app = AppLayout()
+        self.app = AppLayout(page)
         self.content = self.app
         self.padding = 5
 
 class AppLayout(ft.Column):
-    def __init__(self):
+    def __init__(self, page: ft.Page):
         super().__init__()
         self.card_row = CardRow()
         self.title_section = TitleSection()
         self.middle_row_container = MiddleRowContainer()
-        self.search_container = SearchContainer()
+        self.search_container = SearchContainer(page)
         self.controls = [
             self.title_section, 
              self.card_row,
@@ -185,33 +185,33 @@ class MiddleRow(ft.Row):
         ]
 
 class SearchContainer(ft.Container):
-    def __init__(self):
+    def __init__(self, page: ft.Page):
         super().__init__()
         self.width = 585
         self.height = 65
         self.bgcolor = secondary_color
         self.alignment = ft.Alignment(1, 0)
-        self.search_row = SearchRow()
+        self.search_row = SearchRow(page)
         self.content = self.search_row
         self.border_radius = 8
 
 
 class SearchRow(ft.Row):
-    def __init__(self):
+    def __init__(self, page: ft.Page):
         super().__init__()
-        # self.page = ft.Page()
         self.width = 575
         self.height = 60
         self.ticker_box = SearchBox('Ticker')
         self.expiration_box = SearchBox('Expiration')
         self.desired_profit_box = SearchBox('Desired Profit')
-        self.search_button = SearchButton()
+        self.search_button = SearchButton(self, page)
         self.controls = [
             self.ticker_box,
             self.expiration_box,
             self.desired_profit_box,
             self.search_button
-        ] 
+        ]
+    
 
 class SearchBox(ft.TextField):
     def __init__(self, label: str):
@@ -229,24 +229,26 @@ class SearchBox(ft.TextField):
         self.cursor_height = 15
         self.cursor_radius = 8
         self.text_vertical_align = ft.VerticalAlignment.START
-        
+
 class SearchButton(ft.FilledButton):
-    def __init__(self):
+    def __init__(self, parent_row, page: ft.Page):
         super().__init__()
+        self.parent_row = parent_row
+        self.page = page
         self.text = 'Search'
         self.color = text_color
         self.icon = ft.icons.SEARCH
         self.icon_color = text_color
         self.bgcolor = accent_color_1
         self.style = ft.ButtonStyle(shape = ft.RoundedRectangleBorder(radius = 8))
+        self.on_click = self.handle_click
 
+    def handle_click(self, e):
+        ticker = self.parent_row.ticker_box.value
+        expiration = self.parent_row.expiration_box.value
+        percent_gain = int(self.parent_row.desired_profit_box.value)
 
-    # def on_search_click(self, e):
-    #     ticker = self.ticker_box.value
-    #     expiration = self.expiration_box.value
-    #     percent_gain = self.desired_profit_box.value
-
-    #     df = find_gain_stock(ticker, percent_gain, expiration)
-    #     self.page.session.set('search_results', df.to_dict)
-    #     self.page.go('/search_results')
+        df = find_gain_stock(ticker, percent_gain, expiration)
+        self.page.session.set('search_results', df.to_dict())
+        self.page.go('/search_results')
 

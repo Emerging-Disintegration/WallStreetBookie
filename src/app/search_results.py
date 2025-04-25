@@ -3,35 +3,41 @@ from app.layout import primary_color, secondary_color, accent_color_1, accent_co
 import pandas as pd 
 from simpledt import DataFrame
 
-def search_results_page(page: ft.Page):
-    df_dict = page.session.get('search_results')
-    if not df_dict:
-        page.add(ft.Text("No data available to display.", color=text_color))
-        return
 
-    df = pd.DataFrame(df_dict)
-    if df.empty:
-        page.add(ft.Text("No data available to display.", color=text_color))
-        return
 
-    flet_df = DataFrame(df)
-    results_df = flet_df.datatable 
-    page.floating_action_button = ft.FloatingActionButton(
-        icon = ft.icons.HOME,
-        on_click = lambda e: page.go('/'),
-        bgcolor = secondary_color,
-        tooltip='Go back to Home Page'
-    )
-    # page.padding = 0
-    page.window.title_bar_hidden = True
-    page.window.width = 1200
-    page.window.height = 750
-    page.window.resizable = False
-    page.fonts = {
-        'Boldonse-Regular': '/fonts/Boldonse-Regular.ttf',
-        'Urbanist-Regular': '/fonts/Urbanist-Regular.ttf'
-    }
-    page.bgcolor = primary_color
-    page.add(results_df)
+class SearchResults(ft.Container):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.bgcolor = primary_color
+        self.width = 1200
+        self.height = 750
+        self.layout = SearchResultsLayout(page)
+        self.content = self.layout
+        self.alignment = ft.alignment.center
 
-ft.app(search_results_page, assets_dir='assets')
+class SearchResultsLayout(ft.Column):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.bgcolor = primary_color
+        self.scroll = ft.ScrollMode.AUTO
+        self.title = SearchPageTitleContainer()
+        self.df = pd.DataFrame(page.session.get('search_results'))
+        self.flet_df = DataFrame(self.df)
+        self.flet_table = self.flet_df.datatable
+        # self.width = 585
+        # self.height = 700
+        self.alignment = ft.MainAxisAlignment.CENTER
+        self.controls = [
+            self.title,
+            self.flet_table,
+        ]
+class SearchPageTitleContainer(ft.Container):
+    def __init__(self):
+        super().__init__()
+        self.bgcolor = primary_color
+        self.width = 585
+        self.height = 50
+        self.alignment = ft.alignment.center
+        self.content = ft.Text('Potential Contracts', font_family='Boldonse-Regular', size=35, color=text_color)
+        
+       

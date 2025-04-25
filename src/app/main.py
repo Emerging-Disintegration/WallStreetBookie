@@ -1,8 +1,8 @@
 import flet as ft
 from app.layout import *
-# from app.search_results import search_results_page
+from app.search_results import SearchResults
+
 def main(page: ft.Page):
-    
     # page.on_route_change = route_change
     # page.padding = 0
     page.window.title_bar_hidden = True
@@ -15,12 +15,47 @@ def main(page: ft.Page):
     }
     page.bgcolor = primary_color
     page.theme = ft.Theme(font_family='Urbanist-Regular')
-    app = BookieApp()
-    # test = ft.Text('WallStreetBookie', font_family='Boldonse-Regular', size=40, color=text_color)
-    page.add(app)
+    app = BookieApp(page)
+
+    def route_change(route):
+        page.views.clear()
+        page.views.append(
+            ft.View(
+                '/',
+                [app],
+                horizontal_alignment = ft.MainAxisAlignment.CENTER,
+                vertical_alignment = ft.MainAxisAlignment.CENTER,
+                padding = 0
+            )
+        )
+        if page.route =='/search_results':
+            page.views.append(
+                ft.View(
+                    '/search_results',
+                    [SearchResults(page)],
+                    horizontal_alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER,
+                    padding = 10,
+                    bgcolor = primary_color,
+                    floating_action_button = ft.FloatingActionButton(
+                        icon = ft.icons.HOME,
+                        bgcolor = accent_color_1,
+                        on_click = lambda e: page.go('/')
+                    )
+                )
+            )
+        page.update()
+    def view_pop(view):
+        page.views.pop()
+        top_view = page.views[-1]
+        page.go(top_view.route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    page.go(page.route)
+   
+        
     
-    # def route_change(route):
-    #     page.views.clear()
-    #     search_results_page(page)
-    #     page.update()
+    
+        
 ft.app(main, assets_dir='assets')
