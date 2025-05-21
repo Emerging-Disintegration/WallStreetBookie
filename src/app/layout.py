@@ -25,7 +25,7 @@ class AppLayout(ft.Column):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page  # Store page reference
-        self.card_row = CardRow()
+        self.card_row = CardRow(self.page)
         self.title_section = TitleSection()
         self.middle_row_container = MiddleRowContainer()
         self.search_container = SearchContainer(self.page)  # Pass page reference
@@ -52,12 +52,13 @@ class TitleSection(ft.Column):
         ]
 
 class CardRow(ft.Row):
-    def __init__(self):
+    def __init__(self, page: ft.Page):
         super().__init__()
         # self.container = None
-        self.spy = StockCard('SPY')
-        self.qqq = StockCard('QQQ')
-        self.iwm = StockCard('IWM')
+        self.page = page
+        self.spy = StockCard('SPY', self.page)
+        self.qqq = StockCard('QQQ', self.page)
+        self.iwm = StockCard('IWM', self.page)
         self.controls = [
             self.spy,
             self.qqq,
@@ -68,21 +69,23 @@ class CardRow(ft.Row):
 
 
 class StockCard(ft.Container):
-    def __init__(self, stock):
+    def __init__(self, stock, page: ft.Page):
         super().__init__()
         # self.stock = stock
+        self.page = page
         self.bgcolor = secondary_color
         self.border_radius = 8
         self.width = 175
         self.height = 175
         self.alignment = ft.alignment.center 
-        self.content = StockStats(stock)
+        self.content = StockStats(stock, self.page)
         self.padding = 5
 
 
 class StockStats(ft.Column):
-    def __init__(self, stock):
+    def __init__(self, stock, page: ft.Page):
         super().__init__()
+        self.page = page
         self.width = 165
         self.card_title = StockCardTitle(stock)
         self.current_price = get_current_price(stock)
@@ -118,6 +121,12 @@ class StockStats(ft.Column):
 
             )
         ]
+        def set_live_price(self, stock):
+            pass
+        def set_percent_change(self, stock):
+            pass
+        def set_percent_change_icon(self, stock):
+            pass
 
 class StockCardTitle(ft.Container):
     def __init__(self,stock: str):

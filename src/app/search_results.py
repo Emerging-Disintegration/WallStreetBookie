@@ -40,7 +40,7 @@ class SearchResultsLayout(ft.Column):
         super().__init__()
         self.bgcolor = primary_color
         self.scroll = ft.ScrollMode.AUTO
-        self.title = SearchPageTitleContainer()
+        self.title = ft.Text('Potential Contracts', font_family='Boldonse-Regular', size=30, color=text_color)
         self.df = pd.DataFrame(page.session.get('search_results'))
         self.flet_df = DataFrame(self.df)
         self.flet_table = self.flet_df.datatable
@@ -59,13 +59,13 @@ class SearchResultsLayout(ft.Column):
             self.title,
             self.flet_table,
         ]
-class SearchPageTitleContainer(ft.Container):
-    def __init__(self):
-        super().__init__()
-        self.bgcolor = primary_color
-        self.width = 585
-        self.height = 50
-        self.alignment = ft.alignment.center
-        self.content = ft.Text('Potential Contracts', font_family='Boldonse-Regular', size=20, color=text_color)
+# class SearchPageTitleContainer(ft.Container):
+#     def __init__(self):
+#         super().__init__()
+#         self.bgcolor = primary_color
+#         self.width = 50
+#         self.height = 50
+#         self.alignment = ft.alignment.center
+#         self.content = None
         
        
