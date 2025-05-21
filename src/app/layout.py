@@ -1,5 +1,5 @@
 import flet as ft
-from util.search import find_gain_stock
+from util.search import result_chain
 import pandas as pd
 from util.stock_info import *
 
@@ -264,7 +264,7 @@ class SearchButton(ft.FilledButton):
         # segmented_button = self.page.controls[0].content.controls[2].content.controls[0]  
         # side = ['Calls', 'Puts', 'Any'][segmented_button.selected_index]
 
-        df = find_gain_stock(ticker, percent_gain, expiration)
+        df = result_chain(ticker, percent_gain, expiration)
         self.page.session.set('search_results', df.to_dict())
         self.page.go('/search_results')
         self.page.update()
