@@ -3,11 +3,12 @@ from math import log, sqrt, exp, erf
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from datetime import datetime, time
+from datetime import datetime, time, timedelta, timezone
 from yahoo_fin.options import get_options_chain
 import requests
 import os 
 from dotenv import load_dotenv
+import numpy as np
 
 load_dotenv()
 
@@ -16,7 +17,10 @@ chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 
-def get_r()-> float:
+# Cache variables
+
+
+def get_r() -> float:    
     # Use the CNBC.com to get the risk-free interest rate
     url = 'https://www.cnbc.com/quotes/US3M'
     driver = webdriver.Chrome(options=chrome_options)
@@ -25,21 +29,19 @@ def get_r()-> float:
     soup = BeautifulSoup(html_content, 'html.parser')
     rate = soup.find('span', {'class': 'QuoteStrip-lastPrice'}).get_text()
     driver.quit()
-    rate: float = float(rate.strip('%')) / 100  # Convert the percentage to a float 
+    rate = float(rate.strip('%')) / 100  # Convert the percentage to a float
     return rate
 
-def get_t(exp, zone='CT'):
-    time_stamps = {
-    'EST': '16:00',
-    'CT': '15:00',
-    'MT': '14:00',
-    'PST': '13:00'
-}
+def get_t(exp):
+    # Parse expiration date and set to 4pm EST
     exp = datetime.strptime(exp, '%m/%d/%Y')
-    times_str = time_stamps[zone]
-    hours, minutes = map(int, times_str.split(':'))
-    exp_dt = datetime.combine(exp, time(hours, minutes))
-    current_dt = datetime.now()
+    est_tz = timezone(timedelta(hours=-5))  # EST is UTC-5
+    exp_dt = datetime.combine(exp, time(16, 0)).replace(tzinfo=est_tz)
+    
+    # Get current time in UTC
+    current_dt = datetime.now(timezone.utc)
+    
+    # Calculate time difference
     delta = exp_dt - current_dt
     seconds_per_year = 60*60*24*365.2425
     t = delta.total_seconds() / seconds_per_year
@@ -140,17 +142,17 @@ def api_find_gain(stock, percent_gain: float, exp: str, zone ='CT', opt_side= 'a
         }, inplace=True)
     return df
 
-    return df
+    
 ################################################################################################
-def find_gain_stock(stock, percent_gain, exp, zone='CT', opt_side='any'):
+def find_gain_stock(stock, percent_gain, exp, opt_side = 'Any' ):
     times_gain = percent_gain_to_integer(percent_gain)
-    T = get_t(exp, zone)
+    T = get_t(exp)
     df = None
     match opt_side:
-        case 'call':
+        case 'Calls':
             df = get_options_chain(stock, exp)['calls']
             df['side'] = 'call'
-        case 'put':
+        case 'Puts':
             df = get_options_chain(stock, exp)['puts']
             df['side'] = 'put'
         case _:
@@ -187,8 +189,9 @@ def find_gain_stock(stock, percent_gain, exp, zone='CT', opt_side='any'):
     df['percentGain'] = df['percentGain'].apply(lambda x: str(x) + '%')
     # Drop the time to expiration, and times gain columns
     df.drop(columns=['t', 'timesGain'], inplace=True)
+    df['iv'] = df['iv'] * 100
     df['iv'] = df['iv'].round(1)
-    df['iv'] = df['iv'].apply(lambda x: str(x * 100) + '%')
+    df['iv'] = df['iv'].apply(lambda x: str(x) + '%')
     df.rename(
         columns={
             'side': 'Side',

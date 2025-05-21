@@ -24,10 +24,11 @@ class BookieApp(ft.Container):
 class AppLayout(ft.Column):
     def __init__(self, page: ft.Page):
         super().__init__()
+        self.page = page  # Store page reference
         self.card_row = CardRow()
         self.title_section = TitleSection()
         self.middle_row_container = MiddleRowContainer()
-        self.search_container = SearchContainer(page)
+        self.search_container = SearchContainer(self.page)  # Pass page reference
         self.controls = [
             self.title_section, 
              self.card_row,
@@ -170,28 +171,30 @@ class MiddleRow(ft.Row):
         self.width = 585
         self.vix = Vix()
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+        self.segmented_button = ft.CupertinoSlidingSegmentedButton(
+            controls = [
+                ft.Text('Calls'),
+                ft.Text('Puts'),
+                ft.Text('Any')
+            ],
+            selected_index = 1,
+            thumb_color = accent_color_1,
+            bgcolor = primary_color
+        )
         self.controls = [
-            ft.CupertinoSlidingSegmentedButton(
-                controls = [
-                    ft.Text('Calls'),
-                    ft.Text('Puts'),
-                    ft.Text('Any')
-                ],
-                selected_index = 1,
-                thumb_color = accent_color_1,
-                bgcolor = primary_color
-            ),
+            self.segmented_button,
             ft.Text(value = f'VIX: {self.vix.text}', size = 35, color = text_color)
         ]
 
 class SearchContainer(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__()
+        self.page = page  
         self.width = 585
         self.height = 65
         self.bgcolor = secondary_color
         self.alignment = ft.Alignment(1, 0)
-        self.search_row = SearchRow(page)
+        self.search_row = SearchRow(self.page)  
         self.content = self.search_row
         self.border_radius = 8
 
@@ -199,12 +202,14 @@ class SearchContainer(ft.Container):
 class SearchRow(ft.Row):
     def __init__(self, page: ft.Page):
         super().__init__()
+        self.page = page  
         self.width = 575
         self.height = 60
+        self.margin = 5
         self.ticker_box = SearchBox('Ticker')
         self.expiration_box = SearchBox('Expiration')
         self.desired_profit_box = SearchBox('Desired Profit')
-        self.search_button = SearchButton(self, page)
+        self.search_button = SearchButton(self, self.page)  
         self.controls = [
             self.ticker_box,
             self.expiration_box,
@@ -247,8 +252,11 @@ class SearchButton(ft.FilledButton):
         ticker = self.parent_row.ticker_box.value
         expiration = self.parent_row.expiration_box.value
         percent_gain = int(self.parent_row.desired_profit_box.value)
+        # segmented_button = self.page.controls[0].content.controls[2].content.controls[0]  
+        # side = ['Calls', 'Puts', 'Any'][segmented_button.selected_index]
 
         df = find_gain_stock(ticker, percent_gain, expiration)
         self.page.session.set('search_results', df.to_dict())
         self.page.go('/search_results')
+        self.page.update()
 
