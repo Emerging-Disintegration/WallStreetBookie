@@ -29,7 +29,7 @@ def get_r() -> float:
     soup = BeautifulSoup(html_content, 'html.parser')
     rate = soup.find('span', {'class': 'QuoteStrip-lastPrice'}).get_text()
     driver.quit()
-    rate = float(rate.strip('%')) / 100  # Convert the percentage to a float
+    rate: float = float(rate.strip('%')) / 100  # Convert the percentage to a float
     return rate
 
 def get_t(exp):
@@ -89,62 +89,62 @@ def apply_call(df):
 def apply_put(df):
     return in_the_money_premium(df, df['Strike'], df['t'], df['iv'], option_type='put')
 
-def api_find_gain(stock, percent_gain: float, exp: str, zone ='CT', opt_side= 'any')-> pd.DataFrame:
+# def api_result_chain(stock, percent_gain: float, exp: str, zone ='CT', opt_side= 'any')-> pd.DataFrame:
     # Get time to expiration in years
-    T = get_t(exp, zone)
+    # T = get_t(exp, zone)
     # Convert the formatting of the expiration date for the API request
-    exp = exp.replace('/', '%2F')
+    # exp = exp.replace('/', '%2F')
     # Option chain API key
-    option_chain_api_key = os.getenv('OPTION_CHAIN_API_KEY')
-    url = None
+    # option_chain_api_key = os.getenv('OPTION_CHAIN_API_KEY')
+    # url = None
     # Construct the API URL
-    match opt_side:
-        case 'call':
-            url = None
-        case 'put':
-            url = None
-        case _:
-            url = f'https://api.marketdata.app/v1/options/chain/{stock}/?format=json&expiration={exp}&range=otm&columns=strike%2C%20side%2C%20underlying%2C%20dte%2C%20ask%2C%20underlyingPrice%2C%20iv&token={option_chain_api_key}'
+    # match opt_side:
+        # case 'call':
+            # url = None
+        # case 'put':
+            # url = None
+        # case _:
+            # url = f'https://api.marketdata.app/v1/options/chain/{stock}/?format=json&expiration={exp}&range=otm&columns=strike%2C%20side%2C%20underlying%2C%20dte%2C%20ask%2C%20underlyingPrice%2C%20iv&token={option_chain_api_key}'
     # Set variable for the converted percent gain value 
-    times_gain = percent_gain_to_integer(percent_gain)
+    # times_gain = percent_gain_to_integer(percent_gain)
     # Send a GET request to the API
-    response = requests.request('GET', url)
-    chain = response.text
+    # response = requests.request('GET', url)
+    # chain = response.text
     # Parse the response as JSON and create a DataFrame
-    df = pd.read_json(chain)
-
+    # df = pd.read_json(chain)
+# 
     # Calculate time to expiration in years
-    df['t'] = T
+    # df['t'] = T
     # Calculate in-the-money premium for each option
-    df['inTheMoneyPrice'] = df.apply(lambda x: apply_call(x) if x['side'] == 'call' else apply_put(x), axis=1)
-    df['inTheMoneyPrice'] = df['inTheMoneyPrice'].round(2)
+    # df['inTheMoneyPrice'] = df.apply(lambda x: apply_call(x) if x['side'] == 'call' else apply_put(x), axis=1)
+    # df['inTheMoneyPrice'] = df['inTheMoneyPrice'].round(2)
     # Calculate times gain for each option
-    df['timesGain'] = df['inTheMoneyPrice'] / df['ask']
-    df['timesGain'] = df['timesGain'].round(2)
+    # df['timesGain'] = df['inTheMoneyPrice'] / df['ask']
+    # df['timesGain'] = df['timesGain'].round(2)
     # Filter options with times gain greater than the desired value
-    df = df[df['timesGain'] >= times_gain]
+    # df = df[df['timesGain'] >= times_gain]
     # Sort options by times gain in ascending order
-    df.sort_values(by='timesGain', ascending=True, inplace=True)
+    # df.sort_values(by='timesGain', ascending=True, inplace=True)
     # Drop all of the rows after the first 10
-    df.drop(df.index[10:], inplace=True)
+    # df.drop(df.index[10:], inplace=True)
     # Convert times gain back to percent gain 
-    df['percentGain'] = df['timesGain'].apply(lambda x: integer_to_percent_gain(x)).round(2)
-    df['percentGain'] = df['percentGain'].apply(lambda x: str(x) + '%')
-    df['iv'] = df['iv'].round(1)
-    df['iv'] = df['iv'].apply(lambda x: str(x * 100) + '%')
+    # df['percentGain'] = df['timesGain'].apply(lambda x: integer_to_percent_gain(x)).round(2)
+    # df['percentGain'] = df['percentGain'].apply(lambda x: str(x) + '%')
+    # df['iv'] = df['iv'].round(1)
+    # df['iv'] = df['iv'].apply(lambda x: str(x * 100) + '%')
     # Drop the time to expiration, and times gain columns
-    df.drop(columns=['t', 'timesGain'], inplace=True)
-    df.rename(
-        columns={
-            'iv': 'Implied Volatility',
-            'inTheMoneyPrice': 'ITM Price',
-            'percentGain': 'Percent Gain'
-        }, inplace=True)
-    return df
+    # df.drop(columns=['t', 'timesGain'], inplace=True)
+    # df.rename(
+        # columns={
+            # 'iv': 'Implied Volatility',
+            # 'inTheMoneyPrice': 'ITM Price',
+            # 'percentGain': 'Percent Gain'
+        # }, inplace=True)
+    # return df
 
     
 ################################################################################################
-def find_gain_stock(stock, percent_gain, exp, opt_side = 'Any' ):
+def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
     times_gain = percent_gain_to_integer(percent_gain)
     T = get_t(exp)
     df = None
