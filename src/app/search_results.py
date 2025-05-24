@@ -48,15 +48,18 @@ class SearchResultsLayout(ft.Column):
         self.flet_table.heading_text_style = ft.TextStyle(
             color = text_color,
             size = 12,
+            weight = ft.FontWeight.BOLD,
         )
         self.flet_table.horizontal_lines = ft.BorderSide(color = accent_color_2, width = 1)
         self.flet_table.data_text_style = ft.TextStyle(color = text_color)
-        self.flet_table.border_radius = ft.BorderRadius(8,8,8,8)
+        self.flet_table.BorderRadiusValue = 8
         # self.width = 585
         # self.height = 700
         self.alignment = ft.MainAxisAlignment.CENTER
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.controls = [
             self.title,
+            ft.Divider(color=accent_color_2),
             self.flet_table,
         ]
 # class SearchPageTitleContainer(ft.Container):
@@ -68,4 +71,3 @@ class SearchResultsLayout(ft.Column):
 #         self.alignment = ft.alignment.center
 #         self.content = None
         
-       

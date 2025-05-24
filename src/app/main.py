@@ -8,6 +8,7 @@ def main(page: ft.Page):
     page.window.width = 1200
     page.window.height = 750
     page.window.resizable = False
+    page.scroll = ft.ScrollMode.ALWAYS
     page.fonts = {
         'Boldonse-Regular': '/fonts/Boldonse-Regular.ttf',
         'Urbanist-Regular': '/fonts/Urbanist-Regular.ttf'
@@ -26,8 +27,8 @@ def main(page: ft.Page):
         if page.route == '/':
             home_view = ft.View(
                 '/',
-                [BookieApp(page)],  # Create new instance here
-                horizontal_alignment=ft.MainAxisAlignment.CENTER,
+                [BookieApp(page)],  
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 vertical_alignment=ft.MainAxisAlignment.CENTER,
                 padding=0
             )
@@ -37,7 +38,7 @@ def main(page: ft.Page):
                 ft.View(
                     '/search_results',
                     [SearchResults(page)],
-                    horizontal_alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     vertical_alignment=ft.MainAxisAlignment.CENTER,
                     padding = 25,
                     bgcolor = primary_color,
