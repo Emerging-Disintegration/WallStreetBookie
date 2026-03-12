@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WallStreetBookie — Design Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: rgba(18, 18, 26, 0.50);
+    --surface-solid: #12121a;
+    --surface-hover: rgba(26, 26, 46, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --toggle-background: rgba(27, 27, 27, 0.5);
+    --border-glow: rgba(0,255,136,0.12);
+    --green: #00ff88;
+    --magenta: #ff006e;
+    --purple: #b028ff;
+    --yellow: #ffbe0b;
+    --text-primary: #ffffff;
+    --text-secondary: #ddd;
+    --text-muted: #777;
+    --mono: 'Fira Code', 'SF Mono', 'Consolas', monospace;
+    --sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --glass-blur: blur(16px);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.07);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0 clamp(20px, 4vw, 48px);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background glow orbs — gives glass something to refract */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-drift-1 20s ease-in-out infinite alternate;
+  }
+  .bg-orb-2 {
+    position: fixed;
+    bottom: -15%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(176,40,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-drift-2 25s ease-in-out infinite alternate;
+  }
+  .bg-orb-3 {
+    position: fixed;
+    top: 40%;
+    right: 20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,0,110,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-drift-3 18s ease-in-out infinite alternate;
+  }
+  @keyframes orb-drift-1 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(80px, 60px) scale(1.15); }
+  }
+  @keyframes orb-drift-2 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-60px, -40px) scale(1.1); }
+  }
+  @keyframes orb-drift-3 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-40px, 30px) scale(0.9); }
+  }
+
+  /* ─── Scrolling ticker tape background ─── */
+  .ticker-bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.1;
+  }
+  .ticker-bg-row {
+    display: flex;
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--green);
+    padding: 6px 0;
+    will-change: transform;
+  }
+  .ticker-bg-row span {
+    display: inline-block;
+    padding: 0 24px;
+  }
+  /* Even rows scroll left, odd rows scroll right */
+  .ticker-bg-row.scroll-left {
+    animation: ticker-scroll-left 60s linear infinite;
+  }
+  .ticker-bg-row.scroll-right {
+    animation: ticker-scroll-right 60s linear infinite;
+  }
+  /* Stagger speeds for depth */
+  .ticker-bg-row:nth-child(2) { animation-duration: 75s; opacity: 0.7; }
+  .ticker-bg-row:nth-child(3) { animation-duration: 55s; }
+  .ticker-bg-row:nth-child(4) { animation-duration: 80s; opacity: 0.6; }
+  .ticker-bg-row:nth-child(5) { animation-duration: 50s; }
+  .ticker-bg-row:nth-child(6) { animation-duration: 70s; opacity: 0.7; }
+  .ticker-bg-row:nth-child(7) { animation-duration: 65s; }
+  .ticker-bg-row:nth-child(8) { animation-duration: 85s; opacity: 0.5; }
+  .ticker-bg-row:nth-child(9) { animation-duration: 48s; }
+  .ticker-bg-row:nth-child(10) { animation-duration: 72s; opacity: 0.6; }
+  .ticker-bg-row:nth-child(11) { animation-duration: 58s; }
+  .ticker-bg-row:nth-child(12) { animation-duration: 78s; opacity: 0.7; }
+  .ticker-bg-row:nth-child(13) { animation-duration: 52s; }
+  .ticker-bg-row:nth-child(14) { animation-duration: 68s; opacity: 0.5; }
+  .ticker-bg-row:nth-child(15) { animation-duration: 62s; }
+  .ticker-bg-row:nth-child(16) { animation-duration: 74s; opacity: 0.6; }
+
+  /* Alternate row colors between green and magenta for variety */
+  .ticker-bg-row:nth-child(3n) { color: var(--magenta); }
+  .ticker-bg-row:nth-child(5n) { color: var(--purple); }
+
+  @keyframes ticker-scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes ticker-scroll-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+
+  /* Subtle scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    z-index: 9999;
+  }
+
+  .mono { font-family: var(--mono); letter-spacing: 0.02em; }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0 12px;
+  }
+  .header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--green), var(--magenta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .version {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ─── Ticker Strip ─── */
+  .ticker-strip {
+    display: flex;
+    padding: 10px 0 5px;
+    border-bottom: none;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    justify-content: space-between;
+  }
+  .ticker-item {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: transparent;
+    border: none;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .ticker-item:hover {
+    transform: translateY(-1px);
+  }
+  /* Performance glow behind each ticker */
+  .ticker-item.up::before {
+    content: '';
+    position: absolute;
+    inset: -8px -20px;
+    border-radius: 20px;
+    background: radial-gradient(ellipse at center, rgba(0,255,136,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .ticker-item.down::before {
+    content: '';
+    position: absolute;
+    inset: -8px -20px;
+    border-radius: 20px;
+    background: radial-gradient(ellipse at center, rgba(255,0,110,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .ticker-symbol {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.08em;
+  }
+  .ticker-price {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  .ticker-change {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .ticker-change.up { color: var(--green); }
+  .ticker-change.down { color: var(--magenta); }
+
+  /* ─── Tab Bar ─── */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    /* border-bottom: 1px solid rgba(255,255,255,0.05); */
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .tab-btn {
+    padding: 12px 28px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    border-bottom-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ─── Glass Card ─── */
+  .glow-card {
+    background: var(--surface);
+    /* border: var(--glass-border); */
+    border-radius: 14px;
+    box-shadow:
+      var(--glass-highlight),
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 24px var(--border-glow);
+    /* backdrop-filter: var(--glass-blur); */
+    /* -webkit-backdrop-filter: var(--glass-blur); */
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Calculator Section ─── */
+  .calc-card {
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .calc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .calc-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .calc-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  /* ─── Toggle Group ─── */
+  .toggle-group {
+    display: inline-flex;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    /* border: var(--glass-border); */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .toggle-btn {
+    padding: 6px 18px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+  }
+  .toggle-btn.active {
+    background: rgba(0, 255, 136, 0.08);
+    color: var(--green);
+    box-shadow: 0 0 10px rgba(0,255,136,0.1);
+    /* border: 1px solid rgba(0, 255, 136, 0.12); */
+  }
+  .toggle-btn:hover:not(.active) { color: var(--yellow); }
+  .toggle-group.small .toggle-btn { padding: 4px 14px; font-size: 0.7rem; }
+
+  /* ─── Input Row ─── */
+  .input-row {
+    display: grid;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+  .input-row.single { grid-template-columns: 1.5fr 1.5fr 1fr auto; }
+  .input-row.top3 { grid-template-columns: 1.5fr 1fr auto; }
+
+  .input-field label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .input-field input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(10, 10, 15, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: var(--mono);
+    outline: none;
+    height: 42px;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  }
+  .input-field input:focus {
+    border-color: rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 16px rgba(0,255,136,0.12), inset 0 0 20px rgba(0,255,136,0.03);
+    background: rgba(10, 10, 15, 0.85);
+  }
+  .input-field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+  }
+
+  .scan-btn {
+    padding: 10px 28px;
+    background: var(--yellow);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    height: 42px;
+    white-space: nowrap;
+    box-shadow: 0 0 24px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: box-shadow 0.25s, transform 0.15s;
+    font-family: var(--sans);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .scan-btn:hover {
+    box-shadow: 0 0 36px rgba(0,255,136,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+  }
+  .scan-btn:active { transform: translateY(0); }
+
+  .type-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .type-label {
+    font-size: 0.7rem;
+    color: var(--text-primary);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+
+  /* ─── Results Table ─── */
+  .results-card { margin-bottom: 24px; }
+  .results-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .results-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+  }
+  .results-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #717184;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 16px;
+    white-space: nowrap;
+    color: #999;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+  }
+  tbody tr { transition: background 0.2s; }
+  tbody tr:hover { background: rgba(0, 255, 136, 0.03); }
+
+  td.ticker { color: var(--text-primary); font-weight: 600; }
+  td.gain { color: var(--green); font-weight: 600; }
+  td.call { color: var(--green); }
+  td.put { color: var(--magenta); }
+
+  /* ─── Most Active ─── */
+  .active-card { margin-bottom: 24px; }
+  .active-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .active-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 0.1em;
+  }
+  td.rank-top { color: var(--yellow); font-weight: 700; }
+  td.rank { color: var(--text-muted); font-weight: 700; }
+  td.vol-call { color: var(--green); opacity: 0.8; }
+  td.vol-put { color: var(--magenta); opacity: 0.8; }
+  td.ratio-bull { color: var(--green); }
+  td.ratio-bear { color: var(--magenta); }
+
+  /* ─── Hidden Tabs ─── */
+  .tab-content { display: none; }
+  .tab-content.visible { display: block; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 700px) {
+    .input-row.single { grid-template-columns: 1fr 1fr; }
+    .input-row.top3 { grid-template-columns: 1fr; }
+    .ticker-strip { flex-wrap: wrap; }
+    .calc-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Background glow orbs -->
+  <div class="bg-orb-2"></div>
+  <div class="bg-orb-3"></div>
+
+  <!-- Scrolling ticker tape background -->
+  <div class="ticker-bg">
+    <div class="ticker-bg-row scroll-left"><span>AAPL 189.42 ▲</span><span>TSLA 248.90 ▼</span><span>NVDA 875.33 ▲</span><span>MSFT 415.67 ▲</span><span>AMZN 178.24 ▼</span><span>META 502.18 ▲</span><span>GOOG 155.89 ▼</span><span>AMD 164.55 ▲</span><span>SPY 585.23 ▲</span><span>QQQ 498.17 ▼</span><span>NFLX 628.40 ▲</span><span>BA 182.33 ▼</span><span>AAPL 189.42 ▲</span><span>TSLA 248.90 ▼</span><span>NVDA 875.33 ▲</span><span>MSFT 415.67 ▲</span><span>AMZN 178.24 ▼</span><span>META 502.18 ▲</span><span>GOOG 155.89 ▼</span><span>AMD 164.55 ▲</span><span>SPY 585.23 ▲</span><span>QQQ 498.17 ▼</span><span>NFLX 628.40 ▲</span><span>BA 182.33 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>JPM 198.75 ▲</span><span>V 278.60 ▲</span><span>DIS 112.44 ▼</span><span>PYPL 67.82 ▼</span><span>CRM 272.50 ▲</span><span>INTC 31.25 ▼</span><span>IWM 221.05 ▲</span><span>COIN 225.40 ▲</span><span>PLTR 24.18 ▲</span><span>SOFI 8.92 ▼</span><span>RIVN 18.33 ▼</span><span>SNAP 11.45 ▼</span><span>JPM 198.75 ▲</span><span>V 278.60 ▲</span><span>DIS 112.44 ▼</span><span>PYPL 67.82 ▼</span><span>CRM 272.50 ▲</span><span>INTC 31.25 ▼</span><span>IWM 221.05 ▲</span><span>COIN 225.40 ▲</span><span>PLTR 24.18 ▲</span><span>SOFI 8.92 ▼</span><span>RIVN 18.33 ▼</span><span>SNAP 11.45 ▼</span></div>
+    <div class="ticker-bg-row scroll-left"><span>XOM 107.88 ▲</span><span>WMT 165.22 ▲</span><span>BAC 35.18 ▼</span><span>T 17.45 ▼</span><span>GME 14.20 ▲</span><span>AMC 4.85 ▼</span><span>BABA 88.92 ▲</span><span>NIO 7.33 ▼</span><span>UBER 72.15 ▲</span><span>SQ 78.44 ▲</span><span>ROKU 68.90 ▼</span><span>SHOP 72.18 ▲</span><span>XOM 107.88 ▲</span><span>WMT 165.22 ▲</span><span>BAC 35.18 ▼</span><span>T 17.45 ▼</span><span>GME 14.20 ▲</span><span>AMC 4.85 ▼</span><span>BABA 88.92 ▲</span><span>NIO 7.33 ▼</span><span>UBER 72.15 ▲</span><span>SQ 78.44 ▲</span><span>ROKU 68.90 ▼</span><span>SHOP 72.18 ▲</span></div>
+    <div class="ticker-bg-row scroll-right"><span>MU 88.65 ▲</span><span>COST 575.20 ▲</span><span>PFE 28.33 ▼</span><span>MRNA 102.18 ▼</span><span>LLY 782.40 ▲</span><span>UNH 528.90 ▲</span><span>HD 345.67 ▼</span><span>CAT 278.44 ▲</span><span>GS 382.15 ▲</span><span>MS 92.30 ▼</span><span>SBUX 98.72 ▲</span><span>NKE 108.55 ▼</span><span>MU 88.65 ▲</span><span>COST 575.20 ▲</span><span>PFE 28.33 ▼</span><span>MRNA 102.18 ▼</span><span>LLY 782.40 ▲</span><span>UNH 528.90 ▲</span><span>HD 345.67 ▼</span><span>CAT 278.44 ▲</span><span>GS 382.15 ▲</span><span>MS 92.30 ▼</span><span>SBUX 98.72 ▲</span><span>NKE 108.55 ▼</span></div>
+    <div class="ticker-bg-row scroll-left"><span>ABNB 148.33 ▲</span><span>DKNG 38.92 ▲</span><span>HOOD 18.45 ▼</span><span>LCID 3.88 ▼</span><span>F 12.15 ▼</span><span>GM 38.72 ▲</span><span>PANW 302.18 ▲</span><span>ZS 215.44 ▲</span><span>CRWD 285.30 ▲</span><span>NET 82.18 ▲</span><span>DDOG 118.55 ▲</span><span>SNOW 162.40 ▼</span><span>ABNB 148.33 ▲</span><span>DKNG 38.92 ▲</span><span>HOOD 18.45 ▼</span><span>LCID 3.88 ▼</span><span>F 12.15 ▼</span><span>GM 38.72 ▲</span><span>PANW 302.18 ▲</span><span>ZS 215.44 ▲</span><span>CRWD 285.30 ▲</span><span>NET 82.18 ▲</span><span>DDOG 118.55 ▲</span><span>SNOW 162.40 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>MARA 22.15 ▲</span><span>RIOT 12.88 ▲</span><span>MSTR 1485.20 ▲</span><span>SLV 22.40 ▼</span><span>GLD 192.55 ▲</span><span>USO 75.18 ▼</span><span>TLT 92.33 ▼</span><span>HYG 77.45 ▲</span><span>VXX 18.72 ▼</span><span>ARKK 48.90 ▼</span><span>XLF 38.22 ▲</span><span>XLE 88.15 ▲</span><span>MARA 22.15 ▲</span><span>RIOT 12.88 ▲</span><span>MSTR 1485.20 ▲</span><span>SLV 22.40 ▼</span><span>GLD 192.55 ▲</span><span>USO 75.18 ▼</span><span>TLT 92.33 ▼</span><span>HYG 77.45 ▲</span><span>VXX 18.72 ▼</span><span>ARKK 48.90 ▼</span><span>XLF 38.22 ▲</span><span>XLE 88.15 ▲</span></div>
+    <div class="ticker-bg-row scroll-left"><span>SMCI 745.20 ▲</span><span>ARM 135.88 ▲</span><span>AVGO 1282.40 ▲</span><span>TSM 142.15 ▲</span><span>QCOM 168.33 ▼</span><span>MCD 292.18 ▲</span><span>KO 60.45 ▲</span><span>PEP 172.90 ▼</span><span>JNJ 158.72 ▼</span><span>ABBV 175.55 ▲</span><span>TMO 572.18 ▲</span><span>DHR 248.33 ▼</span><span>SMCI 745.20 ▲</span><span>ARM 135.88 ▲</span><span>AVGO 1282.40 ▲</span><span>TSM 142.15 ▲</span><span>QCOM 168.33 ▼</span><span>MCD 292.18 ▲</span><span>KO 60.45 ▲</span><span>PEP 172.90 ▼</span><span>JNJ 158.72 ▼</span><span>ABBV 175.55 ▲</span><span>TMO 572.18 ▲</span><span>DHR 248.33 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>ORCL 125.40 ▲</span><span>ADBE 558.72 ▲</span><span>NOW 735.18 ▲</span><span>INTU 628.45 ▼</span><span>ISRG 385.22 ▲</span><span>REGN 898.15 ▼</span><span>VRTX 418.33 ▲</span><span>LRCX 742.88 ▲</span><span>KLAC 618.45 ▼</span><span>AMAT 172.30 ▲</span><span>MRVL 72.18 ▲</span><span>ON 75.55 ▼</span><span>ORCL 125.40 ▲</span><span>ADBE 558.72 ▲</span><span>NOW 735.18 ▲</span><span>INTU 628.45 ▼</span><span>ISRG 385.22 ▲</span><span>REGN 898.15 ▼</span><span>VRTX 418.33 ▲</span><span>LRCX 742.88 ▲</span><span>KLAC 618.45 ▼</span><span>AMAT 172.30 ▲</span><span>MRVL 72.18 ▲</span><span>ON 75.55 ▼</span></div>
+    <div class="ticker-bg-row scroll-left"><span>DELL 122.88 ▲</span><span>HPQ 28.45 ▼</span><span>IBM 188.72 ▲</span><span>CSCO 52.18 ▲</span><span>TXN 172.33 ▼</span><span>ADI 198.55 ▲</span><span>NXPI 228.40 ▲</span><span>FTNT 62.18 ▲</span><span>OKTA 92.72 ▼</span><span>TWLO 62.45 ▼</span><span>MDB 388.18 ▲</span><span>TEAM 218.33 ▲</span><span>DELL 122.88 ▲</span><span>HPQ 28.45 ▼</span><span>IBM 188.72 ▲</span><span>CSCO 52.18 ▲</span><span>TXN 172.33 ▼</span><span>ADI 198.55 ▲</span><span>NXPI 228.40 ▲</span><span>FTNT 62.18 ▲</span><span>OKTA 92.72 ▼</span><span>TWLO 62.45 ▼</span><span>MDB 388.18 ▲</span><span>TEAM 218.33 ▲</span></div>
+    <div class="ticker-bg-row scroll-right"><span>W 52.18 ▼</span><span>ETSY 72.45 ▼</span><span>PINS 32.88 ▲</span><span>TTD 82.33 ▲</span><span>RBLX 42.72 ▲</span><span>U 28.18 ▼</span><span>PATH 22.45 ▲</span><span>AI 28.88 ▲</span><span>IONQ 12.33 ▲</span><span>RGTI 3.55 ▲</span><span>QUBT 8.18 ▲</span><span>CIFR 5.72 ▼</span><span>W 52.18 ▼</span><span>ETSY 72.45 ▼</span><span>PINS 32.88 ▲</span><span>TTD 82.33 ▲</span><span>RBLX 42.72 ▲</span><span>U 28.18 ▼</span><span>PATH 22.45 ▲</span><span>AI 28.88 ▲</span><span>IONQ 12.33 ▲</span><span>RGTI 3.55 ▲</span><span>QUBT 8.18 ▲</span><span>CIFR 5.72 ▼</span></div>
+    <div class="ticker-bg-row scroll-left"><span>SOXX 228.18 ▲</span><span>SMH 198.45 ▲</span><span>XLK 192.72 ▲</span><span>XBI 88.33 ▼</span><span>KWEB 28.18 ▼</span><span>EEM 42.55 ▼</span><span>FXI 28.40 ▼</span><span>IBIT 42.72 ▲</span><span>BITO 22.18 ▲</span><span>SQQQ 8.88 ▼</span><span>TQQQ 62.33 ▲</span><span>SPXS 12.18 ▼</span><span>SOXX 228.18 ▲</span><span>SMH 198.45 ▲</span><span>XLK 192.72 ▲</span><span>XBI 88.33 ▼</span><span>KWEB 28.18 ▼</span><span>EEM 42.55 ▼</span><span>FXI 28.40 ▼</span><span>IBIT 42.72 ▲</span><span>BITO 22.18 ▲</span><span>SQQQ 8.88 ▼</span><span>TQQQ 62.33 ▲</span><span>SPXS 12.18 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>CHWY 18.92 ▼</span><span>DASH 128.45 ▲</span><span>LYFT 14.72 ▲</span><span>ZM 68.33 ▼</span><span>DOCU 58.18 ▼</span><span>BILL 62.55 ▲</span><span>HUBS 588.40 ▲</span><span>WDAY 252.72 ▲</span><span>VEEV 192.18 ▲</span><span>CDNS 282.88 ▲</span><span>SNPS 518.33 ▲</span><span>ANSS 335.18 ▲</span><span>CHWY 18.92 ▼</span><span>DASH 128.45 ▲</span><span>LYFT 14.72 ▲</span><span>ZM 68.33 ▼</span><span>DOCU 58.18 ▼</span><span>BILL 62.55 ▲</span><span>HUBS 588.40 ▲</span><span>WDAY 252.72 ▲</span><span>VEEV 192.18 ▲</span><span>CDNS 282.88 ▲</span><span>SNPS 518.33 ▲</span><span>ANSS 335.18 ▲</span></div>
+    <div class="ticker-bg-row scroll-left"><span>ENPH 128.72 ▼</span><span>SEDG 72.18 ▼</span><span>FSLR 172.45 ▲</span><span>NEE 72.33 ▲</span><span>CEG 178.88 ▲</span><span>VST 52.18 ▲</span><span>OXY 58.72 ▼</span><span>DVN 45.45 ▼</span><span>EOG 118.18 ▲</span><span>COP 112.88 ▼</span><span>SLB 48.33 ▼</span><span>HAL 35.18 ▼</span><span>ENPH 128.72 ▼</span><span>SEDG 72.18 ▼</span><span>FSLR 172.45 ▲</span><span>NEE 72.33 ▲</span><span>CEG 178.88 ▲</span><span>VST 52.18 ▲</span><span>OXY 58.72 ▼</span><span>DVN 45.45 ▼</span><span>EOG 118.18 ▲</span><span>COP 112.88 ▼</span><span>SLB 48.33 ▼</span><span>HAL 35.18 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>WFC 48.55 ▲</span><span>C 52.18 ▲</span><span>SCHW 72.45 ▲</span><span>BLK 788.33 ▲</span><span>AXP 218.72 ▲</span><span>COF 142.18 ▲</span><span>DFS 128.55 ▲</span><span>ALLY 32.40 ▼</span><span>SYF 42.72 ▲</span><span>FITB 35.18 ▼</span><span>KEY 14.88 ▼</span><span>RF 18.33 ▼</span><span>WFC 48.55 ▲</span><span>C 52.18 ▲</span><span>SCHW 72.45 ▲</span><span>BLK 788.33 ▲</span><span>AXP 218.72 ▲</span><span>COF 142.18 ▲</span><span>DFS 128.55 ▲</span><span>ALLY 32.40 ▼</span><span>SYF 42.72 ▲</span><span>FITB 35.18 ▼</span><span>KEY 14.88 ▼</span><span>RF 18.33 ▼</span></div>
+    <div class="ticker-bg-row scroll-left"><span>LMT 452.88 ▲</span><span>RTX 98.45 ▲</span><span>NOC 472.72 ▲</span><span>GD 278.33 ▲</span><span>SPCE 1.88 ▼</span><span>RKLB 8.18 ▲</span><span>LUNR 12.55 ▲</span><span>JOBY 6.40 ▲</span><span>ACHR 5.72 ▲</span><span>LILM 2.18 ▼</span><span>EVTL 1.88 ▼</span><span>BLDE 3.33 ▼</span><span>LMT 452.88 ▲</span><span>RTX 98.45 ▲</span><span>NOC 472.72 ▲</span><span>GD 278.33 ▲</span><span>SPCE 1.88 ▼</span><span>RKLB 8.18 ▲</span><span>LUNR 12.55 ▲</span><span>JOBY 6.40 ▲</span><span>ACHR 5.72 ▲</span><span>LILM 2.18 ▼</span><span>EVTL 1.88 ▼</span><span>BLDE 3.33 ▼</span></div>
+    <div class="ticker-bg-row scroll-right"><span>SPOT 285.45 ▲</span><span>SE 48.72 ▲</span><span>GRAB 3.88 ▲</span><span>NU 10.18 ▲</span><span>MELI 1628.55 ▲</span><span>GLOB 198.40 ▲</span><span>DLOCL 12.72 ▼</span><span>STNE 12.18 ▼</span><span>PAGS 10.88 ▼</span><span>XP 22.33 ▼</span><span>BIDU 108.18 ▼</span><span>PDD 128.55 ▼</span><span>SPOT 285.45 ▲</span><span>SE 48.72 ▲</span><span>GRAB 3.88 ▲</span><span>NU 10.18 ▲</span><span>MELI 1628.55 ▲</span><span>GLOB 198.40 ▲</span><span>DLOCL 12.72 ▼</span><span>STNE 12.18 ▼</span><span>PAGS 10.88 ▼</span><span>XP 22.33 ▼</span><span>BIDU 108.18 ▼</span><span>PDD 128.55 ▼</span></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header" style="position:relative;z-index:1;">
+    <div class="header-left">
+      <span class="logo">WallStreetBookie</span>
+      <span class="version">v0.2</span>
+    </div>
+  </header>
+
+  <!-- Ticker Strip -->
+  <div class="ticker-strip">
+    <div class="ticker-item up">
+      <span class="ticker-symbol">SPY</span>
+      <span class="ticker-price mono">585.23</span>
+      <span class="ticker-change mono up">+1.24%</span>
+    </div>
+    <div class="ticker-item down">
+      <span class="ticker-symbol">QQQ</span>
+      <span class="ticker-price mono">498.17</span>
+      <span class="ticker-change mono down">-0.38%</span>
+    </div>
+    <div class="ticker-item up">
+      <span class="ticker-symbol">IWM</span>
+      <span class="ticker-price mono">221.05</span>
+      <span class="ticker-change mono up">+0.82%</span>
+    </div>
+    <div class="ticker-item down">
+      <span class="ticker-symbol">VIX</span>
+      <span class="ticker-price mono">14.32</span>
+      <span class="ticker-change mono down">-2.10%</span>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('scanner', this)">SCANNER</button>
+    <button class="tab-btn" onclick="switchTab('active', this)">MOST ACTIVE CHAINS</button>
+  </div>
+
+  <!-- Scanner Tab -->
+  <div id="tab-scanner" class="tab-content visible">
+    <div class="glow-card calc-card">
+      <div class="calc-header">
+        <div class="calc-title-row">
+          <h1 class="calc-title">Find Contracts</h1>
+        </div>
+        <div class="toggle-group" id="mode-toggle">
+          <button class="toggle-btn active" onclick="setMode('single', this)">Single Stock</button>
+          <button class="toggle-btn" onclick="setMode('top3', this)">Hottest Stocks</button>
+        </div>
+      </div>
+
+      <div class="input-row single" id="input-row">
+        <div class="input-field" id="ticker-field">
+          <label>Ticker</label>
+          <input type="text" placeholder="e.g. AAPL" />
+        </div>
+        <div class="input-field">
+          <label>Expiration</label>
+          <input type="date" />
+        </div>
+        <div class="input-field">
+          <label>Target Gain %</label>
+          <input type="text" placeholder="e.g. 100" />
+        </div>
+        <button class="scan-btn">SCAN</button>
+      </div>
+
+      <div class="type-row">
+        <span class="type-label">TYPE</span>
+        <div class="toggle-group small" id="type-toggle">
+          <button class="toggle-btn active" onclick="setType(this)">Any</button>
+          <button class="toggle-btn" onclick="setType(this)">Calls</button>
+          <button class="toggle-btn" onclick="setType(this)">Puts</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="glow-card results-card">
+      <div class="results-header">
+        <span class="results-label">RESULTS</span>
+        <span class="results-count">4 contracts found</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th><th>Strike</th><th>Last</th><th>Bid</th><th>Ask</th>
+              <th>OI</th><th>Side</th><th>IV</th><th>ITM Price</th><th>% Gain</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ticker">AAPL</td>
+              <td class="mono">195.00</td><td class="mono">2.15</td><td class="mono">2.10</td><td class="mono">2.20</td>
+              <td class="mono">12,453</td><td class="call">Call</td><td class="mono">32.1%</td><td class="mono">7.35</td><td class="gain mono">234%</td>
+            </tr>
+            <tr>
+              <td class="ticker">AAPL</td>
+              <td class="mono">200.00</td><td class="mono">0.85</td><td class="mono">0.80</td><td class="mono">0.90</td>
+              <td class="mono">28,102</td><td class="call">Call</td><td class="mono">35.8%</td><td class="mono">4.12</td><td class="gain mono">358%</td>
+            </tr>
+            <tr>
+              <td class="ticker">AAPL</td>
+              <td class="mono">205.00</td><td class="mono">0.32</td><td class="mono">0.28</td><td class="mono">0.35</td>
+              <td class="mono">8,891</td><td class="call">Call</td><td class="mono">38.2%</td><td class="mono">2.88</td><td class="gain mono">722%</td>
+            </tr>
+            <tr>
+              <td class="ticker">AAPL</td>
+              <td class="mono">190.00</td><td class="mono">1.45</td><td class="mono">1.40</td><td class="mono">1.50</td>
+              <td class="mono">6,230</td><td class="put">Put</td><td class="mono">29.4%</td><td class="mono">5.20</td><td class="gain mono">247%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Most Active Tab -->
+  <div id="tab-active" class="tab-content">
+    <div class="glow-card active-card">
+      <div class="active-header">
+        <span class="active-label">MOST ACTIVE OPTIONS CHAINS BY VOLUME</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:center">#</th><th>Ticker</th><th>Total Vol</th>
+            <th>Calls</th><th>Puts</th><th>P/C Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="rank-top" style="text-align:center">1</td><td class="ticker">TSLA</td><td class="mono" style="color:var(--green)">1.2M</td><td class="mono vol-call">680K</td><td class="mono vol-put">520K</td><td class="mono ratio-bull">1.31</td></tr>
+          <tr><td class="rank-top" style="text-align:center">2</td><td class="ticker">NVDA</td><td class="mono" style="color:var(--green)">980K</td><td class="mono vol-call">590K</td><td class="mono vol-put">390K</td><td class="mono ratio-bull">1.51</td></tr>
+          <tr><td class="rank-top" style="text-align:center">3</td><td class="ticker">SPY</td><td class="mono" style="color:var(--green)">870K</td><td class="mono vol-call">410K</td><td class="mono vol-put">460K</td><td class="mono ratio-bear">0.89</td></tr>
+          <tr><td class="rank" style="text-align:center">4</td><td class="ticker">AAPL</td><td class="mono" style="color:var(--green)">654K</td><td class="mono vol-call">380K</td><td class="mono vol-put">274K</td><td class="mono ratio-bull">1.39</td></tr>
+          <tr><td class="rank" style="text-align:center">5</td><td class="ticker">AMD</td><td class="mono" style="color:var(--green)">521K</td><td class="mono vol-call">305K</td><td class="mono vol-put">216K</td><td class="mono ratio-bull">1.41</td></tr>
+          <tr><td class="rank" style="text-align:center">6</td><td class="ticker">META</td><td class="mono" style="color:var(--green)">498K</td><td class="mono vol-call">270K</td><td class="mono vol-put">228K</td><td class="mono ratio-bull">1.18</td></tr>
+          <tr><td class="rank" style="text-align:center">7</td><td class="ticker">AMZN</td><td class="mono" style="color:var(--green)">432K</td><td class="mono vol-call">248K</td><td class="mono vol-put">184K</td><td class="mono ratio-bull">1.35</td></tr>
+          <tr><td class="rank" style="text-align:center">8</td><td class="ticker">QQQ</td><td class="mono" style="color:var(--green)">389K</td><td class="mono vol-call">195K</td><td class="mono vol-put">194K</td><td class="mono ratio-bull">1.01</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('visible'));
+      document.getElementById('tab-' + tabId).classList.add('visible');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function setMode(mode, btn) {
+      const row = document.getElementById('input-row');
+      const tickerField = document.getElementById('ticker-field');
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (mode === 'single') {
+        row.className = 'input-row single';
+        tickerField.style.display = '';
+      } else {
+        row.className = 'input-row top3';
+        tickerField.style.display = 'none';
+      }
+    }
+
+    function setType(btn) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

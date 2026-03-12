@@ -55,7 +55,7 @@ def in_the_money_premium(df: pd.DataFrame, K, T, sigma, option_type='call') -> f
         
         # Check if inputs are positive
         # if df['Strike'].eq(0).any() or df['t'].eq(0).any() or df['iv'].eq(0).any():
-        #     raise ValueError(f"Inputs must be positive (S, K, T, sigma). S={S}, K={K}, T={T}, sigma={sigma}")
+        # raise ValueError(f"Inputs must be positive (S, K, T, sigma). S={S}, K={K}, T={T}, sigma={sigma}")
 
         # Calculate d1 and d2
         d1 = (log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt(T))
