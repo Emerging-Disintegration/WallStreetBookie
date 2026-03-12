@@ -66,7 +66,7 @@ python -m backend.main
 
 ## Status
 
-Active development — currently rebuilding the UI from the ground up with a new glassmorphism design. The backend API bridge and core scanning logic are functional. See `STATUS.md` for a detailed development log.
+Active development — currently rebuilding the UI in React. The backend API bridge and core scanning logic are functional.
 
 ## License
 
