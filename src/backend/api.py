@@ -8,6 +8,27 @@ from util.volume import get_call_put_volume
 
 class Api:
 
+    def __init__(self):
+        self._window = None
+        self._maximized = False
+
+    def set_window(self, window):
+        self._window = window
+
+    def close_window(self):
+        self._window.destroy()
+
+    def minimize_window(self):
+        self._window.minimize()
+
+    def toggle_maximize(self):
+        if self._maximized:
+            self._window.restore()
+            self._maximized = False
+        else:
+            self._window.maximize()
+            self._maximized = True
+
     def search_options(self, ticker: str, expiration: str, desired_gain: int, option_type: str = 'Any') -> list:
         try:
             df = result_chain(ticker, desired_gain, expiration, option_type)

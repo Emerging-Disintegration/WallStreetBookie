@@ -88,10 +88,10 @@ def main():
         title='WallStreetBookie',
         url=entry,
         js_api=api,
-        width=1200,
-        height=750,
-        resizable=False,
+        resizable=True,
+        frameless=True,
     )
+    api.set_window(window)
 
     webview.start(debug=bool(os.environ.get('WALLSTBOOKIE_DEV')))
 

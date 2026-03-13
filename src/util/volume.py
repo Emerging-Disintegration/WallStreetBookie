@@ -1,13 +1,23 @@
 from bs4 import BeautifulSoup
-from selenium import webdriver
 import numpy as np
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+
+
 
 def get_call_put_volume()-> np.array:
 
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+
     url = 'https://optioncharts.io/trending/most-active-stock-options'
     
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chrome_options)
 
     driver.get(url)
 

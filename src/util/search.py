@@ -4,11 +4,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime, time, timedelta, timezone
-from yahoo_fin.options import get_options_chain
-import requests
-import os 
+from util.yahoo_fin_options import get_options_chain
 from dotenv import load_dotenv
-import numpy as np
 
 load_dotenv()
 
