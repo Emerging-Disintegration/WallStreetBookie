@@ -91,7 +91,7 @@ function App() {
               <span className="version">v0.2</span>
             </div>
             <p className="subtitle">
-              Your shortcut to your next Wall Street Bet!
+              Find your next YOLO in seconds!
             </p>
           </div>
         </header>

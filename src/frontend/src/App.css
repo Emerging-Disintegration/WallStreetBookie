@@ -1,3 +1,18 @@
+/* ─── Fonts ─── */
+@font-face {
+  font-family: 'Boldonse';
+  src: url('/fonts/Boldonse-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Urbanist';
+  src: url('/fonts/Urbanist-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -8,7 +23,7 @@
   --surface-hover: rgba(26, 26, 46, 0.6);
   --border: rgba(255, 255, 255, 0.08);
   --toggle-background: rgba(27, 27, 27, 0.5);
-  --border-glow: rgba(0,255,136,0.12);
+  --border-glow: rgba(90, 240, 175, 0.4);
   --green: #00ff88;
   --magenta: #ff006e;
   --purple: #b028ff;
@@ -17,7 +32,7 @@
   --text-secondary: #ddd;
   --text-muted: #777;
   --mono: 'Fira Code', 'SF Mono', 'Consolas', monospace;
-  --sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --sans: 'Urbanist', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --glass-blur: blur(16px);
   --glass-border: 1px solid rgba(255, 255, 255, 0.07);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -238,9 +253,11 @@ body::after {
   gap: 10px;
 }
 .logo {
-  font-size: 1.8rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--green), var(--magenta));
+  font-size: 3rem;
+  font-weight: 400;
+  font-family: 'Boldonse', var(--sans);
+  /* background: linear-gradient(135deg, var(--green), var(--magenta)); */
+  background: rgb(26, 197, 69);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
@@ -258,7 +275,7 @@ body::after {
   gap: 4px;
 }
 .subtitle {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
   font-weight: 400;
   letter-spacing: 0.02em;
@@ -339,7 +356,7 @@ body::after {
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   cursor: pointer;
@@ -355,10 +372,10 @@ body::after {
 /* ─── Glass Card ─── */
 .glow-card {
   background: var(--surface);
-  border-radius: 14px;
+  border-radius: 40px;
   box-shadow:
     var(--glass-highlight),
-    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(47, 92, 54, 0.5),
     0 0 24px var(--border-glow);
   position: relative;
   z-index: 1;
@@ -383,8 +400,8 @@ body::after {
   gap: 12px;
 }
 .calc-title {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 800;
   color: var(--text-primary);
   letter-spacing: 0.04em;
   text-align: center;
@@ -406,8 +423,8 @@ body::after {
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: .9rem;
+  font-weight: 800;
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: all 0.2s;
@@ -489,7 +506,7 @@ body::after {
 }
 .scan-btn:active { transform: translateY(0); }
 .scan-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.65;
   cursor: not-allowed;
   transform: none;
 }
@@ -500,7 +517,7 @@ body::after {
   gap: 12px;
 }
 .type-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-primary);
   letter-spacing: 0.1em;
   font-weight: 600;
