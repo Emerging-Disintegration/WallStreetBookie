@@ -1,5 +1,6 @@
 # pywebview API bridge — exposes Python utils to the React frontend
 
+from datetime import datetime
 from util.search import result_chain
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
 from util.chains import most_active_stock_chains, most_active_etf_chains
@@ -31,6 +32,8 @@ class Api:
 
     def search_options(self, ticker: str, expiration: str, desired_gain: int, option_type: str = 'Any') -> list:
         try:
+            # Convert frontend date format (YYYY-MM-DD) to backend format (MM/DD/YYYY)
+            expiration = datetime.strptime(expiration, '%Y-%m-%d').strftime('%m/%d/%Y')
             df = result_chain(ticker, desired_gain, expiration, option_type)
             return {"success": True, "data": df.to_dict('records')}
         except Exception as e:
