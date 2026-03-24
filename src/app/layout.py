@@ -1,5 +1,5 @@
 import flet as ft
-from util.search import result_chain
+from util.scan import result_chain
 import pandas as pd
 from util.stock_info import *
 

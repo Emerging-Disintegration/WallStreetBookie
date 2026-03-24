@@ -12,55 +12,109 @@ chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
 
 
-def most_active_stock_chains()-> np.array:
+import time
+
+def most_active_stock_chains() -> list:
     # Define the URL of the webpage to scrape
     url = 'https://optioncharts.io/trending/most-active-stock-options'
-    # Initialize a Chrome webdriver
-    driver = webdriver.Chrome(options=chrome_options)
+    max_retries = 3
 
-    # Load the webpage in the Chrome webdriver
-    driver.get(url)
+    for attempt in range(max_retries):
+        # Initialize a Chrome webdriver
+        driver = webdriver.Chrome(options=chrome_options)
+        try:
+            # Load the webpage in the Chrome webdriver
+            driver.get(url)
 
-    # Get the HTML content of the loaded webpage
-    html_content = driver.page_source
+            # Get the HTML content of the loaded webpage
+            html_content = driver.page_source
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(html_content, 'html.parser')
+            # Parse the HTML content using BeautifulSoup
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-    # Find the first table in the parsed HTML
-    table = soup.find_all('table')[0]
-    driver.quit()  
-    # Convert the table to a pandas DataFrame
-    df = pd.read_html(str(table))[0]
+            # Find the first table in the parsed HTML
+            tables = soup.find_all('table')
+            if not tables:
+                raise ValueError("No tables found on page")
 
-    # Extract the list of stock symbols from the DataFrame
-    most_active_stocks = np.array(df['Symbol'])
+            # Convert the table to a pandas DataFrame
+            df = pd.read_html(str(tables[0]))[0]
+            if df.empty:
+                raise ValueError("Most active table is empty")
 
-    return most_active_stocks
+            # Rename columns to match frontend expectations
+            df = df.rename(columns={
+                'Symbol': 'ticker',
+                'Call Volume': 'callVolume',
+                'Put Volume': 'putVolume',
+                'Total Volume': 'totalVolume'
+            })
+
+            # Clean numeric columns (remove commas and convert to int)
+            for col in ['callVolume', 'putVolume', 'totalVolume']:
+                if col in df.columns:
+                    df[col] = df[col].astype(str).str.replace(',', '').astype(int)
+
+            return df.to_dict('records')
+
+        except Exception as e:
+            print(f"Stock chains scrape attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2)
+        finally:
+            driver.quit()
+
+    return []
 
 
-def most_active_etf_chains()-> np.array:
+def most_active_etf_chains() -> list:
     # Define the URL of the webpage to scrape
     url = 'https://optioncharts.io/trending/most-active-etf-options'
-    # Initialize a Chrome webdriver
-    driver = webdriver.Chrome(options=chrome_options)
+    max_retries = 3
 
-    # Load the webpage in the Chrome webdriver
-    driver.get(url)
+    for attempt in range(max_retries):
+        # Initialize a Chrome webdriver
+        driver = webdriver.Chrome(options=chrome_options)
+        try:
+            # Load the webpage in the Chrome webdriver
+            driver.get(url)
 
-    # Get the HTML content of the loaded webpage
-    html_content = driver.page_source
+            # Get the HTML content of the loaded webpage
+            html_content = driver.page_source
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(html_content, 'html.parser')
+            # Parse the HTML content using BeautifulSoup
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-    # Find the first table in the parsed HTML
-    table = soup.find_all('table')[0]
-    driver.quit()
+            # Find the first table in the parsed HTML
+            tables = soup.find_all('table')
+            if not tables:
+                raise ValueError("No tables found on page")
 
-    # Convert the table to a pandas DataFrame
-    df = pd.read_html(str(table))[0]
+            # Convert the table to a pandas DataFrame
+            df = pd.read_html(str(tables[0]))[0]
+            if df.empty:
+                raise ValueError("Most active ETF table is empty")
 
-    most_active_etf: np.array = np.array(df['Symbol'])
+            # Rename columns to match frontend expectations
+            df = df.rename(columns={
+                'Symbol': 'ticker',
+                'Call Volume': 'callVolume',
+                'Put Volume': 'putVolume',
+                'Total Volume': 'totalVolume'
+            })
 
-    return most_active_etf
+            # Clean numeric columns (remove commas and convert to int)
+            for col in ['callVolume', 'putVolume', 'totalVolume']:
+                if col in df.columns:
+                    df[col] = df[col].astype(str).str.replace(',', '').astype(int)
+
+            return df.to_dict('records')
+
+        except Exception as e:
+            print(f"ETF chains scrape attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2)
+        finally:
+            driver.quit()
+
+    return []

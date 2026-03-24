@@ -46,8 +46,8 @@ export default function ProfitCalculator({ onSearch, loading }) {
               <input
                 id="ticker-input"
                 type="text"
-                placeholder="e.g. AAPL"
-                value={ticker}
+                placeholder="e.g. QQQ"
+                value={ticker.toUpperCase()}
                 onChange={(e) => setTicker(e.target.value)}
                 maxLength={10}
                 autoComplete="off"

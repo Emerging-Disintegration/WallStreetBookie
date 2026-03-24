@@ -9,7 +9,7 @@ export default function MostActiveTable({ api }) {
   useEffect(() => {
     if (!api) return;
 
-    const fetchActive = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
         const res = await api.get_active_stocks();
@@ -22,8 +22,22 @@ export default function MostActiveTable({ api }) {
       setLoading(false);
     };
 
-    fetchActive();
+    loadData();
   }, [api]);
+
+  const handleRetry = async () => {
+    if (!api) return;
+    setLoading(true);
+    try {
+      const res = await api.get_active_stocks();
+      if (res.success) {
+        setChains(res.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch active chains:', e);
+    }
+    setLoading(false);
+  };
 
   return (
     <GlowCard className="active-card">
@@ -34,9 +48,16 @@ export default function MostActiveTable({ api }) {
       </div>
       {loading ? (
         <div className="loading">Loading active chains...</div>
+      ) : chains.length === 0 ? (
+        <div className="empty-state">
+          <p>Sorry, we couldn't fetch the most active chains right now.</p>
+          <button onClick={handleRetry} className="btn-secondary" style={{ marginTop: '1rem' }}>
+            Try Again
+          </button>
+        </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-        <table>
+          <table>
           <caption className="sr-only">Most active options chains ranked by volume</caption>
           <thead>
             <tr>

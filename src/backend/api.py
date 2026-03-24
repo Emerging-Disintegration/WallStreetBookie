@@ -1,10 +1,11 @@
 # pywebview API bridge — exposes Python utils to the React frontend
 
 from datetime import datetime
-from util.search import result_chain
+from util.scan import result_chain
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
 from util.chains import most_active_stock_chains, most_active_etf_chains
 from util.volume import get_call_put_volume
+from util.watchlist import WatchlistManager
 
 
 class Api:
@@ -12,6 +13,7 @@ class Api:
     def __init__(self):
         self._window = None
         self._maximized = False
+        self.watchlist_manager = WatchlistManager()
 
     def set_window(self, window):
         self._window = window
@@ -86,14 +88,14 @@ class Api:
     def get_active_stocks(self) -> dict:
         try:
             stocks = most_active_stock_chains()
-            return {"success": True, "data": stocks.tolist()}
+            return {"success": True, "data": stocks}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def get_active_etfs(self) -> dict:
         try:
             etfs = most_active_etf_chains()
-            return {"success": True, "data": etfs.tolist()}
+            return {"success": True, "data": etfs}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -107,5 +109,26 @@ class Api:
                     "putVolume": int(volume[1])
                 }
             }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_watchlist(self) -> dict:
+        try:
+            watchlist = self.watchlist_manager.get_all()
+            return {"success": True, "data": watchlist}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def add_favorite(self, ticker: str) -> dict:
+        try:
+            success, message = self.watchlist_manager.add(ticker)
+            return {"success": success, "message": message}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def remove_favorite(self, ticker: str) -> dict:
+        try:
+            success, message = self.watchlist_manager.remove(ticker)
+            return {"success": success, "message": message}
         except Exception as e:
             return {"success": False, "error": str(e)}

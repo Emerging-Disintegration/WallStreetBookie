@@ -99,3 +99,16 @@ def get_vix()-> float:
     vix = float(soup.find('span', {'class': 'QuoteStrip-lastPrice'}).get_text())
     driver.quit()
     return vix
+
+def get_vix_percent_change()-> float:
+    driver = webdriver.Chrome(options=chrome_options)
+    url = 'https://www.cnbc.com/quotes/.VIX'
+    driver.get(url)
+    html_content = driver.page_source
+    soup = BeautifulSoup(html_content, 'html.parser')
+    try:
+        vix_percent_change = soup.find('span', {'class': 'QuoteStrip-changeUp'}).get_text()
+    except AttributeError:
+        vix_percent_change = soup.find('span', {'class': 'QuoteStrip-changeDown'}).get_text()
+    driver.quit()
+    return float(vix_percent_change.strip('()%'))

@@ -29,11 +29,12 @@ def get_call_put_volume()-> np.array:
 
     df = pd.read_html(str(table))[0]
 
-    call_volume: int = (df['Call Volume']).sum()
-    put_volume: int = (df['Put Volume']).sum()
+    call_volume: int = (df['Call Volume']).astype(int).sum()
+    put_volume: int = (df['Put Volume']).astype(int).sum()
+    # total_volume: int = call_volume + put_volume
+    # put_call_ratio: float = put_volume / call_volume if call_volume > 0 else 0
 
-    return np.array([call_volume, put_volume])
-
+    return np.array([call_volume, put_volume,])
 
 
 
