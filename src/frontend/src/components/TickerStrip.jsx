@@ -1,9 +1,9 @@
-// Market ticker strip — SPY, QQQ, IWM, VIX
+// Market ticker strip — SPY, QQQ, IWM
 import { useState, useEffect } from 'react';
 
 const TICKERS = ['SPY', 'QQQ', 'IWM'];
 
-export default function TickerStrip({ api }) {
+export default function TickerStrip({ api, onVixData }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -21,19 +21,16 @@ export default function TickerStrip({ api }) {
           console.error(`Failed to fetch ${ticker}:`, e);
         }
       }
-      // fetch VIX
+      // fetch VIX and pass it up to parent
       try {
         const vixRes = await api.get_vix_value();
         const changeRes = await api.get_change('^VIX');
-        if (vixRes.success) {
-          setData(prev => ({
-            ...prev,
-            VIX: {
-              ticker: 'VIX',
-              price: vixRes.data,
-              change: changeRes.success ? changeRes.data : 0,
-            },
-          }));
+        if (vixRes.success && onVixData) {
+          onVixData({
+            ticker: 'VIX',
+            price: vixRes.data,
+            change: changeRes.success ? changeRes.data : 0,
+          });
         }
       } catch (e) {
         console.error('Failed to fetch VIX:', e);
@@ -43,11 +40,9 @@ export default function TickerStrip({ api }) {
     fetchAll();
   }, [api]);
 
-  const allTickers = [...TICKERS, 'VIX'];
-
   return (
     <div className="ticker-strip">
-      {allTickers.map((sym) => {
+      {TICKERS.map((sym) => {
         const item = data[sym];
         if (!item) {
           return (

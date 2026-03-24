@@ -3,14 +3,20 @@ from bs4 import BeautifulSoup  # For parsing HTML and XML documents
 from selenium import webdriver  # For controlling a web browser
 import pandas as pd  # For data manipulation and analysis
 import numpy as np  # For mathematical operations
+from selenium.webdriver.chrome.options import Options
 
+
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--no-sandbox')
 
 
 def most_active_stock_chains()-> np.array:
     # Define the URL of the webpage to scrape
     url = 'https://optioncharts.io/trending/most-active-stock-options'
     # Initialize a Chrome webdriver
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chrome_options)
 
     # Load the webpage in the Chrome webdriver
     driver.get(url)
@@ -23,7 +29,7 @@ def most_active_stock_chains()-> np.array:
 
     # Find the first table in the parsed HTML
     table = soup.find_all('table')[0]
-
+    driver.quit()  
     # Convert the table to a pandas DataFrame
     df = pd.read_html(str(table))[0]
 
@@ -37,7 +43,7 @@ def most_active_etf_chains()-> np.array:
     # Define the URL of the webpage to scrape
     url = 'https://optioncharts.io/trending/most-active-etf-options'
     # Initialize a Chrome webdriver
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chrome_options)
 
     # Load the webpage in the Chrome webdriver
     driver.get(url)
@@ -50,6 +56,7 @@ def most_active_etf_chains()-> np.array:
 
     # Find the first table in the parsed HTML
     table = soup.find_all('table')[0]
+    driver.quit()
 
     # Convert the table to a pandas DataFrame
     df = pd.read_html(str(table))[0]

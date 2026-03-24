@@ -5,9 +5,10 @@ export default function ResultsTable({ results }) {
   if (!results || results.length === 0) return null;
 
   return (
+    <>
+    <h2 className="results-title">RESULTS</h2>
     <GlowCard className="results-card">
       <div className="results-header">
-        <span className="results-label">RESULTS</span>
         <span className="results-count">
           {results.length} contract{results.length !== 1 ? 's' : ''} found
         </span>
@@ -26,7 +27,7 @@ export default function ResultsTable({ results }) {
               <th>Side</th>
               <th>IV</th>
               <th>ITM Price</th>
-              <th>% Gain</th>
+              <th className="gain-header">% Gain</th>
             </tr>
           </thead>
           <tbody>
@@ -50,5 +51,6 @@ export default function ResultsTable({ results }) {
         </table>
       </div>
     </GlowCard>
+    </>
   );
 }

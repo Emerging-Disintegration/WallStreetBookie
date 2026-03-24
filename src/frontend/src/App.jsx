@@ -15,6 +15,7 @@ function App() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [vixData, setVixData] = useState(null);
 
   const handleSearch = async ({ mode, ticker, expiration, targetGain, optionType }) => {
     if (!api) return;
@@ -97,10 +98,29 @@ function App() {
         </header>
 
         {/* Market tickers */}
-        <TickerStrip api={api} />
+        <TickerStrip api={api} onVixData={setVixData} />
 
-        {/* Navigation */}
-        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Navigation + VIX */}
+        <div className="tab-row">
+          <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+          {vixData && (() => {
+            const isUp = vixData.change >= 0;
+            const direction = isUp ? 'up' : 'down';
+            const sign = isUp ? '+' : '';
+            const changeStr = `${sign}${Number(vixData.change).toFixed(2)}%`;
+            return (
+              <div className={`ticker-item vix-item ${direction}`}>
+                <span className="ticker-symbol">VIX:</span>
+                <span className="ticker-price mono">
+                  {Number(vixData.price).toFixed(2)}
+                </span>
+                <span className={`ticker-change mono ${direction}`}>
+                  {changeStr}
+                </span>
+              </div>
+            );
+          })()}
+        </div>
 
         {/* Error banner */}
         {error && <div className="error-banner" role="alert">{error}</div>}

@@ -18,12 +18,12 @@
 
 :root {
   --bg: #0a0a0f;
-  --surface: rgba(18, 18, 26, 0.50);
+  --surface: rgba(18, 18, 26, 0.70);
   --surface-solid: #12121a;
   --surface-hover: rgba(26, 26, 46, 0.6);
   --border: rgba(255, 255, 255, 0.08);
   --toggle-background: rgba(27, 27, 27, 0.5);
-  --border-glow: rgba(90, 240, 175, 0.4);
+  --border-glow: rgba(5, 100, 59, 0.4);
   --green: #00ff88;
   --magenta: #ff006e;
   --purple: #b028ff;
@@ -287,7 +287,7 @@ body::after {
   display: flex;
   padding: 10px 0 5px;
   border-bottom: none;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   position: relative;
   z-index: 1;
   justify-content: space-between;
@@ -331,7 +331,7 @@ body::after {
   letter-spacing: 0.08em;
 }
 .ticker-price {
-  font-size: 1.4rem;
+  font-size: 2rem;
   font-weight: 600;
   color: #fff;
 }
@@ -342,13 +342,25 @@ body::after {
 .ticker-change.up { color: var(--green); }
 .ticker-change.down { color: var(--magenta); }
 
-/* ─── Tab Bar ─── */
-.tab-bar {
+/* VIX overrides */
+.vix-item .ticker-symbol { font-size: 1.5rem; }
+.vix-item .ticker-symbol { color: var(--yellow); }
+.vix-item .ticker-price { font-size: 1.5rem; }
+.vix-item .ticker-price { color: var(--yellow); }
+.vix-item .ticker-change { font-size: rem; }
+
+/* ─── Tab Row (tabs + VIX) ─── */
+.tab-row {
   display: flex;
-  gap: 0;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 24px;
   position: relative;
   z-index: 1;
+}
+.tab-bar {
+  display: flex;
+  gap: 0;
 }
 .tab-btn {
   padding: 12px 28px;
@@ -384,7 +396,7 @@ body::after {
 /* ─── Calculator Section ─── */
 .calc-card {
   padding: 20px 24px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 .calc-header {
   display: flex;
@@ -524,19 +536,21 @@ body::after {
 }
 
 /* ─── Results Table ─── */
-.results-card { margin-bottom: 24px; }
+.results-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.08em;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.results-card { margin-top: 12px; margin-bottom: 24px; }
 .results-header {
-  padding: 14px 20px;
+  padding: 18px 28px;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-}
-.results-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  letter-spacing: 0.1em;
 }
 .results-count {
   font-size: 0.75rem;
@@ -569,6 +583,7 @@ tbody tr { transition: background 0.2s; }
 tbody tr:hover { background: rgba(0, 255, 136, 0.03); }
 
 td.ticker { color: var(--text-primary); font-weight: 600; }
+th.gain-header { color: var(--yellow); }
 td.gain { color: var(--green); font-weight: 600; }
 td.call { color: var(--green); }
 td.put { color: var(--magenta); }

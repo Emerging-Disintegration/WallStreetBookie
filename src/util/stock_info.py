@@ -23,12 +23,10 @@ def get_current_price(stock: str) -> str:
     return str(current_price)
     
 
-def get_percent_change(stock: str) -> str:
+def get_percent_change(stock: str) -> float:
     quote = api.quote(stock)
     percent_change = quote['dp']
-    # round to 2 decimal places
-    percent_change = round(percent_change, 2)
-    return f'{percent_change}%'
+    return round(percent_change, 2)
 
 def percent_change_icon(percent_change: str) -> ft.Icon:
     if percent_change.startswith('-'):

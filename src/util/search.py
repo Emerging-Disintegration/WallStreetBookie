@@ -191,10 +191,12 @@ def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
     df['iv'] = df['iv'].apply(lambda x: str(x) + '%')
     df.rename(
         columns={
+            'Last Price': 'Last',
+            'Open Interest': 'OI',
             'side': 'Side',
-            'iv': 'Implied Volatility',
+            'iv': 'IV',
             'inTheMoneyPrice': 'ITM Price',
-            'percentGain': 'Percent Gain'
+            'percentGain': '% Gain'
         }, inplace=True)
     return df
 
