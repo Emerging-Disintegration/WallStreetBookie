@@ -1,4 +1,5 @@
 # WallStreetBookie
+![WallStreetBookie Home Page](WallStBookie.jpg)
 
 A desktop options scanner that finds OTM (out-of-the-money) contracts projected to hit a user-defined profit target. Built with Python + pywebview on the backend and React + Vite on the frontend. Made with high risk tolerance day traders in mind, but applicable in a variety of use cases.
 
