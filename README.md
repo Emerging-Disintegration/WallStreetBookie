@@ -13,6 +13,8 @@ Enter a ticker, expiration date, and desired gain percentage — WallStreetBooki
 - **Hottest Stocks mode** — auto-scan the top 3 most active options chains instead of a single ticker
 - **Most Active Chains** — ranked view of the highest-volume options chains
 - **Market Ticker Strip** — live SPY, QQQ, IWM, and VIX prices with performance indicators
+- **Watchlist** — save and track favorite tickers with live price updates
+- **P/L Chart** — Black-Scholes powered profit/loss curve with adjustable DTE slider
 
 ## Tech Stack
 
@@ -67,8 +69,10 @@ python -m backend.main
 
 ## Status
 
-Active development — currently rebuilding the UI in React. The backend API bridge and core scanning logic are functional.
+Functional and in active polish — core scanning, P/L charting, and watchlist are all working. Known open issue: DTE slider drag triggers window move on macOS (pywebview 6.1 intercepts drags below the JS layer).
 
 ## License
 
-TBD
+Copyright © 2026. All rights reserved.
+
+This software and its source code are proprietary. Unauthorized copying, modification, distribution, or commercial use — in whole or in part — is strictly prohibited without explicit written permission from the author.

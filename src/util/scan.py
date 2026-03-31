@@ -1,5 +1,6 @@
 import pandas as pd 
-from math import log, sqrt, exp, erf
+import numpy as np
+from scipy.stats import norm
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -47,27 +48,23 @@ def get_t(exp):
 # Get the risk-free interest rate
 r = get_r()  # Risk-free interest rate
 
+# Calculate the in-the-money premium for a given option using the Black-Scholes-Merton model
 def in_the_money_premium(df: pd.DataFrame, K, T, sigma, option_type='call') -> float:
         S = K  # Set stock price equal to strike price
-        
-        # Check if inputs are positive
-        # if df['Strike'].eq(0).any() or df['t'].eq(0).any() or df['iv'].eq(0).any():
-        # raise ValueError(f"Inputs must be positive (S, K, T, sigma). S={S}, K={K}, T={T}, sigma={sigma}")
 
-        # Calculate d1 and d2
-        d1 = (log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt(T))
-        d2 = d1 - sigma * sqrt(T)
-
-        # Calculate in-the-money premium for a call option
+        # Black Scholes d1 and d2 calculations
+        d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+        d2 = d1 - sigma * np.sqrt(T)
+        # Calculate the in-the-money premium based on the option type
         if option_type == 'call':
-            money_premium = S * 0.5 * (1 + erf(d1 / sqrt(2))) - K * exp(-r * T) * 0.5 * (1 + erf(d2 / sqrt(2)))
-        # Calculate in-the-money premium for a put option
+            itm_premium = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         elif option_type == 'put':
-            money_premium = K * exp(-r * T) * 0.5 * (1 + erf(-d2 / sqrt(2))) - S * 0.5 * (1 + erf(-d1 / sqrt(2)))
+            itm_premium = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        # Handle unrecognized option types
         else:
-            raise ValueError("Invalid option_type. Use 'call' or 'put'")
+            raise ValueError(f'Unrecognized option type: {option_type}. Expected "call" or "put".')
 
-        return money_premium
+        return itm_premium
 
 # Function to change percent to float value
 def percent_gain_to_integer(percent_gain: float) -> float:

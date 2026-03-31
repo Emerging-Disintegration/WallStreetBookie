@@ -12,6 +12,8 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.12"
 pandas = "^2.2.3"
+numpy = "^2.2.0"
+scipy = "^1.15.0"
 yahoo-fin = "^0.8.9.1"
 flet = "^0.26.0"
 ipykernel = "^6.29.5"
