@@ -170,8 +170,9 @@ def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
     # Calculate in-the-money premium for each option
     df['inTheMoneyPrice'] = df.apply(lambda x: apply_call(x) if x['side'] == 'call' else apply_put(x), axis=1)
     df['inTheMoneyPrice'] = df['inTheMoneyPrice'].round(2)
-    # Calculate times gain for each option
-    df['timesGain'] = df['inTheMoneyPrice'] / df['Ask']
+    # Calculate times gain; fall back to Last Price when Ask is 0
+    price_basis = df['Ask'].where(df['Ask'] > 0, df['Last Price'])
+    df['timesGain'] = (df['inTheMoneyPrice'] / price_basis).replace([float('inf'), float('-inf')], float('nan'))
     df['timesGain'] = df['timesGain'].round(2)
 
     # Filter options with times gain greater than the desired value

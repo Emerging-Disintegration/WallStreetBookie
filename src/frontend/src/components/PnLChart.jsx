@@ -235,6 +235,7 @@ export default function PnLChart({
             step="0.01"
             value={sliderPos}
             onChange={handleSliderChange}
+            onMouseDown={(e) => e.stopPropagation()}
             aria-label={`Days to expiration: ${formatDte(displayDte)}`}
           />
           <span className="pnl-slider-value">{formatDte(displayDte)}</span>

@@ -1,5 +1,6 @@
 # pywebview API bridge — exposes Python utils to the React frontend
 
+import threading
 from datetime import datetime
 from util.scan import result_chain, get_t
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
@@ -20,7 +21,7 @@ class Api:
         self._window = window
 
     def close_window(self):
-        self._window.destroy()
+        threading.Timer(0.1, self._window.destroy).start()
 
     def minimize_window(self):
         self._window.minimize()

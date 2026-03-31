@@ -112,7 +112,7 @@ function App() {
           <div className="header-center">
             <div className="header-left">
               <span className="logo">WallStreetBookie</span>
-              <span className="version">v0.2</span>
+              <span className="version">v0.3</span>
             </div>
             <p className="subtitle">
               Find your next YOLO in seconds!
