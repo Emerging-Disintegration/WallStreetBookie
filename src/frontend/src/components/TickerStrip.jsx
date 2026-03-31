@@ -8,24 +8,23 @@ export default function TickerStrip({ api, onVixData }) {
 
   useEffect(() => {
     if (!api) return;
+    let cancelled = false;
 
     const fetchAll = async () => {
-      // fetch ETFs
       for (const ticker of TICKERS) {
         try {
           const res = await api.get_stock_card_data(ticker);
-          if (res.success) {
+          if (!cancelled && res.success) {
             setData(prev => ({ ...prev, [ticker]: res.data }));
           }
         } catch (e) {
-          console.error(`Failed to fetch ${ticker}:`, e);
+          // silently skip failed ticker fetches
         }
       }
-      // fetch VIX and pass it up to parent
       try {
         const vixRes = await api.get_vix_value();
         const changeRes = await api.get_change('^VIX');
-        if (vixRes.success && onVixData) {
+        if (!cancelled && vixRes.success && onVixData) {
           onVixData({
             ticker: 'VIX',
             price: vixRes.data,
@@ -33,11 +32,12 @@ export default function TickerStrip({ api, onVixData }) {
           });
         }
       } catch (e) {
-        console.error('Failed to fetch VIX:', e);
+        // silently skip VIX fetch failure
       }
     };
 
     fetchAll();
+    return () => { cancelled = true; };
   }, [api]);
 
   return (
@@ -53,16 +53,18 @@ export default function TickerStrip({ api, onVixData }) {
           );
         }
 
-        const isUp = item.change >= 0;
+        const change = Number(item.change) || 0;
+        const price = Number(item.price) || 0;
+        const isUp = change >= 0;
         const direction = isUp ? 'up' : 'down';
         const sign = isUp ? '+' : '';
-        const changeStr = `${sign}${Number(item.change).toFixed(2)}%`;
+        const changeStr = `${sign}${change.toFixed(2)}%`;
 
         return (
           <div key={sym} className={`ticker-item ${direction}`}>
             <span className="ticker-symbol">{sym}</span>
             <span className="ticker-price mono">
-              {Number(item.price).toFixed(2)}
+              {price.toFixed(2)}
             </span>
             <span className={`ticker-change mono ${direction}`}>
               {changeStr}

@@ -2,6 +2,7 @@
 const TABS = [
   { id: 'scanner', label: 'SCANNER' },
   { id: 'active', label: 'MOST ACTIVE CHAINS' },
+  { id: 'watchlist', label: 'WATCHLIST' },
 ];
 
 export default function TabBar({ activeTab, onTabChange }) {

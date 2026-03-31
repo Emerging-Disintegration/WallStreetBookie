@@ -48,7 +48,7 @@ export default function ProfitCalculator({ onSearch, loading }) {
                 type="text"
                 placeholder="e.g. QQQ"
                 value={ticker.toUpperCase()}
-                onChange={(e) => setTicker(e.target.value)}
+                onChange={(e) => setTicker(e.target.value.replace(/[^A-Za-z.]/g, ''))}
                 maxLength={10}
                 autoComplete="off"
               />

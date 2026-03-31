@@ -24,9 +24,12 @@ class WatchlistManager:
              return {"version": 1, "tickers": []}
 
     def _save(self, data):
+        # Atomic write: temp file then rename
         data["updated_at"] = datetime.now().isoformat()
-        with open(self.filepath, 'w') as f:
+        tmp = self.filepath.with_suffix('.tmp')
+        with open(tmp, 'w') as f:
             json.dump(data, f, indent=2)
+        tmp.replace(self.filepath)
 
     def get_all(self):
         data = self._load()

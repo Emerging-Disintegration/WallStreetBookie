@@ -1,5 +1,5 @@
 // Root component — manages tabs, search state, and layout
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useApi } from './hooks/useApi';
 import TickerTapeBackground from './components/TickerTapeBackground';
 import TickerStrip from './components/TickerStrip';
@@ -7,6 +7,7 @@ import TabBar from './components/TabBar';
 import ProfitCalculator from './components/ProfitCalculator';
 import ResultsTable from './components/ResultsTable';
 import MostActiveTable from './components/MostActiveTable';
+import Watchlist from './components/Watchlist';
 import TitleBar from './components/TitleBar';
 
 function App() {
@@ -16,6 +17,25 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [vixData, setVixData] = useState(null);
+  const [watchlistTickers, setWatchlistTickers] = useState([]);
+  const [expiration, setExpiration] = useState('');
+
+  const refreshWatchlist = useCallback(async () => {
+    if (!api) return;
+    try {
+      const res = await api.get_watchlist();
+      if (res.success) {
+        setWatchlistTickers(res.data);
+      }
+    } catch (e) {
+      // Silent fail — watchlist will show as empty
+    }
+  }, [api]);
+
+  // Fetch watchlist on app mount
+  useEffect(() => {
+    refreshWatchlist();
+  }, [refreshWatchlist]);
 
   const handleSearch = async ({ mode, ticker, expiration, targetGain, optionType }) => {
     if (!api) return;
@@ -23,6 +43,7 @@ function App() {
     setLoading(true);
     setError(null);
     setResults([]);
+    setExpiration(expiration);
 
     try {
       if (mode === 'single') {
@@ -69,9 +90,11 @@ function App() {
     );
   }
 
-  // center the UI vertically when scanner has no results
+  // center the UI vertically when scanner has no results or watchlist is empty
   const hasResults = results.length > 0;
   const scannerEmpty = activeTab === 'scanner' && !hasResults;
+  const watchlistEmpty = activeTab === 'watchlist' && watchlistTickers.length === 0;
+  const shouldCenter = scannerEmpty || watchlistEmpty;
 
   return (
     <>
@@ -83,7 +106,7 @@ function App() {
       <div className="bg-orb-3" />
 
       {/* Main content — centers vertically when no results */}
-      <main className={`app-content${scannerEmpty ? ' centered' : ''}`}>
+      <main className={`app-content${shouldCenter ? ' centered' : ''}`}>
         {/* Header */}
         <header className="header">
           <div className="header-center">
@@ -104,15 +127,17 @@ function App() {
         <div className="tab-row">
           <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
           {vixData && (() => {
-            const isUp = vixData.change >= 0;
+            const change = Number(vixData.change) || 0;
+            const price = Number(vixData.price) || 0;
+            const isUp = change >= 0;
             const direction = isUp ? 'up' : 'down';
             const sign = isUp ? '+' : '';
-            const changeStr = `${sign}${Number(vixData.change).toFixed(2)}%`;
+            const changeStr = `${sign}${change.toFixed(2)}%`;
             return (
               <div className={`ticker-item vix-item ${direction}`}>
                 <span className="ticker-symbol">VIX:</span>
                 <span className="ticker-price mono">
-                  {Number(vixData.price).toFixed(2)}
+                  {price.toFixed(2)}
                 </span>
                 <span className={`ticker-change mono ${direction}`}>
                   {changeStr}
@@ -129,13 +154,28 @@ function App() {
         {activeTab === 'scanner' && (
           <>
             <ProfitCalculator onSearch={handleSearch} loading={loading} />
-            <ResultsTable results={results} />
+            <ResultsTable
+              results={results}
+              watchlistTickers={watchlistTickers}
+              onRefresh={refreshWatchlist}
+              api={api}
+              expiration={expiration}
+            />
           </>
         )}
 
         {/* Most Active tab */}
         {activeTab === 'active' && (
           <MostActiveTable api={api} />
+        )}
+
+        {/* Watchlist tab */}
+        {activeTab === 'watchlist' && (
+          <Watchlist
+            tickers={watchlistTickers}
+            onRefresh={refreshWatchlist}
+            api={api}
+          />
         )}
       </main>
     </>

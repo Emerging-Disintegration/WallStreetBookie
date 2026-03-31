@@ -1,11 +1,12 @@
 # pywebview API bridge — exposes Python utils to the React frontend
 
 from datetime import datetime
-from util.scan import result_chain
+from util.scan import result_chain, get_t
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
 from util.chains import most_active_stock_chains, most_active_etf_chains
 from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
+from util.pnl import calculate_contract_value
 
 
 class Api:
@@ -122,13 +123,42 @@ class Api:
     def add_favorite(self, ticker: str) -> dict:
         try:
             success, message = self.watchlist_manager.add(ticker)
-            return {"success": success, "message": message}
+            if success:
+                return {"success": True, "data": {"added": True}}
+            return {"success": False, "error": message}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def remove_favorite(self, ticker: str) -> dict:
         try:
             success, message = self.watchlist_manager.remove(ticker)
-            return {"success": success, "message": message}
+            if success:
+                return {"success": True, "data": {"removed": True}}
+            return {"success": False, "error": message}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_value_curve(self, strike, option_type, current_price, expiration='', dte_override=None, iv=0.3, price_range_pct=0.2) -> dict:
+        try:
+            strike = float(strike)
+            current_price = float(current_price)
+            iv = float(iv)
+            option_type = option_type.lower()
+
+            # compute DTE: use slider override, or calculate from expiration date
+            if dte_override is not None:
+                dte = max(0, float(dte_override))
+                max_dte = dte
+            elif expiration:
+                exp_converted = datetime.strptime(expiration, '%Y-%m-%d').strftime('%m/%d/%Y')
+                dte = max(0, get_t(exp_converted) * 365.2425)
+                max_dte = dte
+            else:
+                dte = 0
+                max_dte = 0
+
+            result = calculate_contract_value(strike, option_type, current_price, dte=dte, iv=iv, price_range_pct=price_range_pct)
+            result["maxDte"] = round(max_dte, 2)
+            return {"success": True, "data": result}
         except Exception as e:
             return {"success": False, "error": str(e)}

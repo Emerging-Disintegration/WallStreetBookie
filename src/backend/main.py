@@ -88,6 +88,8 @@ def main():
         title='WallStreetBookie',
         url=entry,
         js_api=api,
+        width=1200,
+        height=850,
         resizable=True,
         frameless=True,
     )

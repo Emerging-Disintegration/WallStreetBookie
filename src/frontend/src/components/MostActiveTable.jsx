@@ -17,7 +17,7 @@ export default function MostActiveTable({ api }) {
           setChains(res.data);
         }
       } catch (e) {
-        console.error('Failed to fetch active chains:', e);
+        // silently skip fetch failure
       }
       setLoading(false);
     };
@@ -49,9 +49,9 @@ export default function MostActiveTable({ api }) {
       {loading ? (
         <div className="loading">Loading active chains...</div>
       ) : chains.length === 0 ? (
-        <div className="empty-state">
+        <div className="active-empty">
           <p>Sorry, we couldn't fetch the most active chains right now.</p>
-          <button onClick={handleRetry} className="btn-secondary" style={{ marginTop: '1rem' }}>
+          <button onClick={handleRetry} className="btn-retry">
             Try Again
           </button>
         </div>
@@ -61,7 +61,7 @@ export default function MostActiveTable({ api }) {
           <caption className="sr-only">Most active options chains ranked by volume</caption>
           <thead>
             <tr>
-              <th style={{ textAlign: 'center' }}>#</th>
+              <th className="col-rank">#</th>
               <th>Ticker</th>
               <th>Total Vol</th>
               <th>Calls</th>
@@ -80,11 +80,11 @@ export default function MostActiveTable({ api }) {
 
               return (
                 <tr key={i}>
-                  <td className={rankClass} style={{ textAlign: 'center' }}>
+                  <td className={`${rankClass} col-rank`}>
                     {i + 1}
                   </td>
                   <td className="ticker">{chain.ticker || chain}</td>
-                  <td className="mono" style={{ color: 'var(--green)' }}>
+                  <td className="mono vol-total">
                     {formatVolume(total)}
                   </td>
                   <td className="mono vol-call">{formatVolume(callVol)}</td>
@@ -105,7 +105,7 @@ export default function MostActiveTable({ api }) {
 
 // Format large volume numbers
 function formatVolume(num) {
-  if (typeof num !== 'number') return num;
+  if (typeof num !== 'number' || isNaN(num)) return '—';
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
   if (num >= 1_000) return `${(num / 1_000).toFixed(0)}K`;
   return num.toLocaleString();
