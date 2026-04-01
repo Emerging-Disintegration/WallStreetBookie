@@ -13,7 +13,7 @@ src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from backend.api import Api
+from backend.api import Api, _drag_state
 
 vite_process = None
 
@@ -80,6 +80,51 @@ def get_entry_point() -> str:
         return index_path
 
 
+def patch_cocoa_drag():
+    """Monkey-patch pywebview's mouseDragged_ to respect the shared drag flag
+    and fix the super-call bug (mouseDown_ -> mouseDragged_)."""
+    from webview.platforms import cocoa
+    from webview.platforms.cocoa import BrowserView
+    import AppKit
+
+    def patched_mouseDragged_(self, event):
+        i = BrowserView.get_instance('webview', self)
+        window = self.window()
+
+        # only move the window if drag is enabled
+        if i.frameless and i.easy_drag and _drag_state['enabled']:
+            screenFrame = i.screen
+            if screenFrame is None:
+                raise RuntimeError('Failed to obtain screen')
+            windowFrame = window.frame()
+            if windowFrame is None:
+                raise RuntimeError('Failed to obtain frame')
+            currentLocation = window.convertBaseToScreen_(
+                window.mouseLocationOutsideOfEventStream()
+            )
+            newOrigin = AppKit.NSMakePoint(
+                (currentLocation.x - self.initialLocation.x),
+                (currentLocation.y - self.initialLocation.y),
+            )
+            if (newOrigin.y + windowFrame.size.height) > (
+                screenFrame.origin.y + screenFrame.size.height
+            ):
+                newOrigin.y = screenFrame.origin.y + (
+                    screenFrame.size.height + windowFrame.size.height
+                )
+            window.setFrameOrigin_(newOrigin)
+
+        if event.modifierFlags() & getattr(AppKit, 'NSEventModifierFlagControl', 1 << 18):
+            if not cocoa._state['debug']:
+                return
+
+        # forward as mouseDown_ so WKWebView's internal dispatch receives the event
+        # (WKWebView ignores mouseDragged: from the responder chain)
+        super(BrowserView.WebKitHost, self).mouseDown_(event)
+
+    BrowserView.WebKitHost.mouseDragged_ = patched_mouseDragged_
+
+
 def main():
     api = Api()
     entry = get_entry_point()
@@ -91,10 +136,11 @@ def main():
         width=1200,
         height=850,
         resizable=True,
-        frameless=True,
+        frameless=True
     )
     api.set_window(window)
 
+    patch_cocoa_drag()
     webview.start(debug=bool(os.environ.get('WALLSTBOOKIE_DEV')))
 
 

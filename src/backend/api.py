@@ -9,6 +9,9 @@ from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
 from util.pnl import calculate_contract_value
 
+# shared flag — Cocoa monkey-patch reads this to decide whether to move the window
+_drag_state = {'enabled': True}
+
 
 class Api:
 
@@ -25,6 +28,10 @@ class Api:
 
     def minimize_window(self):
         self._window.minimize()
+
+    def enable_easy_drag(self, enabled):
+        """Toggle native window dragging. Called by frontend slider hover."""
+        _drag_state['enabled'] = bool(enabled)
 
     def toggle_maximize(self):
         if self._maximized:

@@ -67,11 +67,12 @@ export default function PnLChart({
 }) {
   const [sliderPos, setSliderPos] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
-  const debounceRef = useRef(null);
+  const trailingRef = useRef(null);
+  const lastCallRef = useRef(0);
 
   useEffect(() => {
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (trailingRef.current) clearTimeout(trailingRef.current);
     };
   }, []);
 
@@ -101,10 +102,18 @@ export default function PnLChart({
   const handleSliderChange = useCallback((e) => {
     const pos = parseFloat(e.target.value);
     setSliderPos(pos);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
+    // throttle: fire immediately if 50ms+ since last call, schedule trailing call otherwise
+    const now = Date.now();
+    if (now - lastCallRef.current >= 50) {
+      lastCallRef.current = now;
       if (onDteChange) onDteChange(maxDte - pos);
-    }, 150);
+    } else {
+      if (trailingRef.current) clearTimeout(trailingRef.current);
+      trailingRef.current = setTimeout(() => {
+        lastCallRef.current = Date.now();
+        if (onDteChange) onDteChange(maxDte - pos);
+      }, 50);
+    }
   }, [onDteChange, maxDte]);
 
   if (!pnlData || pnlData.length === 0) return null;
@@ -189,7 +198,7 @@ export default function PnLChart({
             strokeWidth={2}
             fill={`url(#fill-${gradId})`}
             dot={false}
-            activeDot={false}
+            activeDot={{ r: 4, fill: '#fff', strokeWidth: 0 }}
             isAnimationActive={false}
           />
           {/* breakeven line at P/L = 0 */}
@@ -199,14 +208,6 @@ export default function PnLChart({
             strokeDasharray="6 4"
             strokeWidth={1}
             label={{ value: 'Breakeven', position: 'insideTopRight', fill: '#ffbe0b', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
-          />
-          {/* current stock price */}
-          <ReferenceLine
-            x={currentPrice}
-            stroke="#00d4ff"
-            strokeDasharray="3 3"
-            strokeWidth={1}
-            label={{ value: `Price: $${currentPrice.toFixed(2)}`, position: 'insideTopLeft', fill: '#00d4ff', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
           />
           {/* strike price */}
           <ReferenceLine
@@ -235,7 +236,14 @@ export default function PnLChart({
             step="0.01"
             value={sliderPos}
             onChange={handleSliderChange}
-            onMouseDown={(e) => e.stopPropagation()}
+            onMouseDown={() => window.pywebview.api.enable_easy_drag(false)}
+            onMouseEnter={(e) => {
+              if (e.buttons === 0) window.pywebview.api.enable_easy_drag(false);
+            }}
+            onMouseLeave={(e) => {
+              if (e.buttons === 0) window.pywebview.api.enable_easy_drag(true);
+            }}
+            onMouseUp={() => window.pywebview.api.enable_easy_drag(true)}
             aria-label={`Days to expiration: ${formatDte(displayDte)}`}
           />
           <span className="pnl-slider-value">{formatDte(displayDte)}</span>

@@ -1039,7 +1039,6 @@ tbody tr.expanded { background: rgba(0, 255, 136, 0.05); }
 .pnl-slider {
   flex: 1;
   -webkit-appearance: none;
-  -webkit-app-region: no-drag;
   appearance: none;
   height: 4px;
   background: rgba(255, 255, 255, 0.08);
