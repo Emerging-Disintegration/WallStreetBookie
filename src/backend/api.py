@@ -2,6 +2,7 @@
 
 import threading
 from datetime import datetime
+import yfinance as yf
 from util.scan import result_chain, get_t
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
 from util.chains import most_active_stock_chains, most_active_etf_chains
@@ -143,6 +144,51 @@ class Api:
             if success:
                 return {"success": True, "data": {"removed": True}}
             return {"success": False, "error": message}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def _pct_change(self, ticker_obj, range_key: str, current_price: float):
+        # compute percent change from range start to current price
+        try:
+            if range_key == '1D':
+                prev = float(ticker_obj.fast_info['previous_close'])
+                if prev > 0:
+                    return round((current_price - prev) / prev * 100, 2)
+                return None
+            period_map = {
+                '5D': '5d', '1M': '1mo',
+                '6M': '6mo', 'YTD': 'ytd', '1Y': '1y'
+            }
+            period = period_map.get(range_key)
+            if not period:
+                return None
+            hist = ticker_obj.history(period=period)
+            if hist.empty:
+                return None
+            start = float(hist['Close'].iloc[0])
+            if start <= 0:
+                return None
+            return round((current_price - start) / start * 100, 2)
+        except Exception:
+            return None
+
+    def get_watchlist_with_prices(self, range_key='1D') -> dict:
+        # returns watchlist items enriched with current price and percent change
+        try:
+            items = self.watchlist_manager.get_all()
+            enriched = []
+            for item in items:
+                entry = dict(item)
+                try:
+                    t = yf.Ticker(item['symbol'])
+                    current = round(float(t.fast_info['last_price']), 2)
+                    entry['price'] = current
+                    entry['change'] = self._pct_change(t, range_key, current)
+                except Exception:
+                    entry['price'] = None
+                    entry['change'] = None
+                enriched.append(entry)
+            return {"success": True, "data": enriched}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

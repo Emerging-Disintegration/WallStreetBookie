@@ -23,7 +23,7 @@ function App() {
   const refreshWatchlist = useCallback(async () => {
     if (!api) return;
     try {
-      const res = await api.get_watchlist();
+      const res = await api.get_watchlist_with_prices();
       if (res.success) {
         setWatchlistTickers(res.data);
       }
@@ -112,7 +112,7 @@ function App() {
           <div className="header-center">
             <div className="header-left">
               <span className="logo">WallStreetBookie</span>
-              <span className="version">v0.3</span>
+              <span className="version">v0.3.1</span>
             </div>
             <p className="subtitle">
               Find your next YOLO in seconds!

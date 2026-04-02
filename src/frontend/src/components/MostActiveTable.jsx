@@ -75,8 +75,8 @@ export default function MostActiveTable({ api }) {
               const callVol = chain.callVolume || chain.calls || 0;
               const putVol = chain.putVolume || chain.puts || 0;
               const total = chain.totalVolume || callVol + putVol;
-              const ratio = putVol > 0 ? (callVol / putVol).toFixed(2) : '—';
-              const isBull = parseFloat(ratio) >= 1;
+              const ratio = callVol > 0 ? (putVol / callVol).toFixed(2) : '—';
+              const isBull = parseFloat(ratio) <= 0.7;
 
               return (
                 <tr key={i}>

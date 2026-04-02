@@ -5,22 +5,6 @@ import {
   CartesianGrid, ReferenceLine, Tooltip
 } from 'recharts';
 
-function PnLTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null;
-  const { price, pnl, value } = payload[0].payload;
-  const inProfit = pnl >= 0;
-
-  return (
-    <div className="pnl-tooltip">
-      <div className="pnl-tooltip-price">Stock Price: ${price.toFixed(2)}</div>
-      <div className={`pnl-tooltip-pnl ${inProfit ? 'profit' : 'loss'}`}>
-        P/L: {inProfit ? '+' : ''}${pnl.toFixed(2)}
-      </div>
-      <div className="pnl-tooltip-value">Contract Value: ${value.toFixed(2)}</div>
-    </div>
-  );
-}
-
 // format dollar values with sign for Y-axis
 function formatPnL(v) {
   if (v === 0) return '$0';
@@ -28,8 +12,8 @@ function formatPnL(v) {
   return `${sign}${Math.abs(v).toLocaleString()}`;
 }
 
-// compute round-number ticks for the X-axis
-function niceTickValues(data, key = 'price') {
+// compute round-number ticks for an axis
+function niceTickValues(data, key = 'price', targetTicks = 12) {
   if (!data || data.length < 2) return undefined;
   const values = data.map((d) => d[key]);
   const min = Math.min(...values);
@@ -37,7 +21,6 @@ function niceTickValues(data, key = 'price') {
   const range = max - min;
   if (range <= 0) return undefined;
 
-  const targetTicks = 12;
   const rawStep = range / targetTicks;
   const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const steps = [1, 2, 2.5, 5, 10];
@@ -67,6 +50,7 @@ export default function PnLChart({
 }) {
   const [sliderPos, setSliderPos] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
   const trailingRef = useRef(null);
   const lastCallRef = useRef(0);
 
@@ -84,6 +68,7 @@ export default function PnLChart({
     setPrevTicker(ticker);
     setSliderPos(0);
     setCurrentPrice(initialCurrentPrice);
+    setHoveredPoint(null);
   }
 
   const displayDte = maxDte - sliderPos;
@@ -123,6 +108,13 @@ export default function PnLChart({
   const maxPrice = Math.max(...prices);
 
   const ticks = niceTickValues(pnlData);
+
+  // Y-axis ticks — 6 round values, always include breakeven at 0
+  let yTicks = niceTickValues(pnlData, 'pnl', 6) || [];
+  if (!yTicks.includes(0)) {
+    yTicks = [...yTicks, 0].sort((a, b) => a - b);
+  }
+
   const optLabel = optionType ? optionType.charAt(0).toUpperCase() + optionType.slice(1).toLowerCase() : '';
 
   // gradient split at Y=0 (breakeven)
@@ -146,6 +138,13 @@ export default function PnLChart({
   // unique gradient IDs to prevent SVG collisions
   const gradId = `${ticker}-${strike}`;
 
+  // closest data point to the actual stock price — used as the default display
+  const defaultPoint = pnlData.reduce((closest, d) =>
+    Math.abs(d.price - currentPrice) < Math.abs(closest.price - currentPrice) ? d : closest
+  , pnlData[0]);
+
+  const displayPoint = hoveredPoint ?? defaultPoint;
+
   return (
     <div className="pnl-chart-wrapper">
       <div className="pnl-chart-header">
@@ -157,9 +156,34 @@ export default function PnLChart({
         </div>
       </div>
 
+      <div className="pnl-metrics">
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">Stock Price:</span>
+          <span className="pnl-metric-value mono">${displayPoint.price.toFixed(2)}</span>
+        </div>
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">P/L:</span>
+          <span className={`pnl-metric-value mono ${displayPoint.pnl >= 0 ? 'profit' : 'loss'}`}>
+            {displayPoint.pnl >= 0 ? '+' : ''}${displayPoint.pnl.toFixed(2)}
+          </span>
+        </div>
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">Contract Value:</span>
+          <span className="pnl-metric-value mono">${displayPoint.value.toFixed(2)}</span>
+        </div>
+      </div>
+
       <div className="pnl-chart-body">
         <ResponsiveContainer width="100%" height={250}>
-        <AreaChart data={pnlData} margin={{ top: 20, right: 20, bottom: 25, left: 10 }}>
+        <AreaChart
+          data={pnlData}
+          margin={{ top: 20, right: 20, bottom: 25, left: 10 }}
+          onMouseMove={(chartState) => {
+            const pt = chartState.activePayload?.[0]?.payload;
+            if (pt) setHoveredPoint(pt);
+          }}
+          onMouseLeave={() => setHoveredPoint(null)}
+        >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset={splitOffset} stopColor="var(--green, #00ff88)" />
@@ -190,6 +214,7 @@ export default function PnLChart({
             tickFormatter={formatPnL}
             width={80}
             domain={['auto', 'auto']}
+            ticks={yTicks}
           />
           <Area
             type="linear"
@@ -217,7 +242,7 @@ export default function PnLChart({
             label={{ value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'rgba(255,255,255,0.3)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
           />
           <Tooltip
-            content={<PnLTooltip />}
+            content={() => null}
             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
             isAnimationActive={false}
           />
