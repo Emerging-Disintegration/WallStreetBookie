@@ -68,7 +68,7 @@ Visualize your potential outcomes with a sophisticated charting engine.
 | **Desktop Shell** | [pywebview](https://pywebview.flowrl.com/) (Python 3.12) |
 | **Frontend** | React 19 + Vite + Recharts |
 | **Backend** | Python 3.12 with JS Bridge (`api.py`) |
-| **Data Layer** | Custom wrappers for `yfinance`, `yahoo-fin`, `finnhub`, and `beautifulsoup4` |
+| **Data Layer** | Custom wrappers for `yfinance`, `finnhub`, and `beautifulsoup4` |
 | **Styling** | Vanilla CSS (Glassmorphism / Cyberpunk aesthetic) |
 
 ---
