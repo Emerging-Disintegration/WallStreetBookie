@@ -10,15 +10,17 @@
 
 The core of WallStreetBookie. Find contracts that match your specific risk/reward profile.
 
-- **Smart Filtering**: Input a ticker, expiration date, and a target "Times Gain" (multiplier). The scanner filters thousands of contracts to find only those projected to hit your target.
+- **Smart Filtering**: Input a ticker, expiration date, and a target profit percentage (Target Gain %). The scanner filters through contracts to find only those projected to hit your target.
 - **Call/Put Flexibility**: Toggle between scanning for Calls, Puts, or both simultaneously.
 - **Hottest Stocks Mode**: One-click scan for the top 3 most active options chains in the market, saving you the time of manual ticker entry.
-- **Data Normalization**: Handles varied date formats and API quirks behind the scenes to ensure consistent results.
+
+## Set Your Parameters
 
 ![SCREENSHOT: PROFIT_CALCULATOR](app_screenshots/profit_calulator.jpg)
 
-![Screenshot: Results Table](app_screenshots/results.jpg)
+## Look Through Your Options (*Pun Intended*)
 
+![Screenshot: Results Table](app_screenshots/results.jpg)
 
 ---
 
@@ -28,7 +30,6 @@ Identify where the "smart money" and retail volume are flowing.
 
 - **Ranked Volume**: A dedicated view of the highest-volume options chains across the market.
 - **Sentiment Analysis**: Automatically calculates Put/Call ratios with a 0.7 "Bullish" threshold to highlight market sentiment at a glance.
-- **ETF vs. Equity**: Switch between broad market ETFs and individual equity chains to find specialized opportunities.
 
 ![SCREENSHOT: MOST_ACTIVE_TABLE](app_screenshots/most_active_table.jpg)
 
@@ -36,7 +37,7 @@ Identify where the "smart money" and retail volume are flowing.
 
 ### ⭐ Unified Watchlist & Multi-Timeframe Performance
 
-WallStreetBookie offers a unique, high-efficiency watchlist that does more than just track prices. It provides a "bird's-eye view" of your entire group of favorite stocks across multiple horizons simultaneously.
+WallStreetBookie offers a unique watchlist that provides a "bird's-eye view" of your entire group of favorite stocks across multiple horizons simultaneously.
 
 - **Multi-Horizon Performance**: A standout feature that allows you to instantly toggle the performance of your *entire* watchlist across six critical timeframes: **1D, 5D, 1M, 6M, YTD, and 1Y**. This unparalleled convenience enables traders to spot relative strength and emerging trends across their custom basket of stocks without the friction of checking individual charts.
 - **Dynamic Pricing**: Real-time stock price tracking integrated directly into the list view.
