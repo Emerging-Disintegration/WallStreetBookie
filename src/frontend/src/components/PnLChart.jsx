@@ -24,12 +24,13 @@ function niceTickValues(data, key = 'price', targetTicks = 12) {
   const rawStep = range / targetTicks;
   const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const steps = [1, 2, 2.5, 5, 10];
-  let step = steps.find((s) => s * magnitude >= rawStep) * magnitude;
+  const step = steps.find((s) => s * magnitude >= rawStep) * magnitude;
 
-  const start = Math.ceil(min / step) * step;
+  const start = Math.floor(min / step) * step;
   const ticks = [];
-  for (let v = start; v <= max; v += step) {
-    ticks.push(parseFloat(v.toFixed(2)));
+  // Use a small epsilon to avoid missing the last tick due to precision
+  for (let v = start; v <= max + (step * 0.1); v += step) {
+    ticks.push(parseFloat(v.toFixed(10)));
   }
   return ticks.length > 1 ? ticks : undefined;
 }
@@ -44,6 +45,18 @@ function formatDte(dte) {
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;
 }
+
+// helper component to sync tooltip data with external metrics bar
+const SyncTooltip = ({ active, payload, setHoveredPoint }) => {
+  useEffect(() => {
+    if (active && payload && payload.length > 0) {
+      setHoveredPoint(payload[0].payload);
+    } else {
+      setHoveredPoint(null);
+    }
+  }, [active, payload, setHoveredPoint]);
+  return null;
+};
 
 export default function PnLChart({
   data, currentPrice: initialCurrentPrice, premium, optionType, ticker, strike, maxDte, onDteChange
@@ -177,12 +190,7 @@ export default function PnLChart({
         <ResponsiveContainer width="100%" height={250}>
         <AreaChart
           data={pnlData}
-          margin={{ top: 20, right: 20, bottom: 25, left: 10 }}
-          onMouseMove={(chartState) => {
-            const pt = chartState.activePayload?.[0]?.payload;
-            if (pt) setHoveredPoint(pt);
-          }}
-          onMouseLeave={() => setHoveredPoint(null)}
+          margin={{ top: 20, right: 30, bottom: 25, left: 60 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -202,6 +210,7 @@ export default function PnLChart({
             type="number"
             domain={['dataMin', 'dataMax']}
             tick={{ fill: '#777', fontSize: 11, fontFamily: 'Fira Code, monospace' }}
+            tickMargin={20}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `$${Math.round(v)}`}
@@ -209,10 +218,11 @@ export default function PnLChart({
           />
           <YAxis
             tick={{ fill: '#777', fontSize: 11, fontFamily: 'Fira Code, monospace' }}
+            tickMargin={20}
             axisLine={false}
             tickLine={false}
             tickFormatter={formatPnL}
-            width={80}
+            width={130}
             domain={['auto', 'auto']}
             ticks={yTicks}
           />
@@ -242,7 +252,8 @@ export default function PnLChart({
             label={{ value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'rgba(255,255,255,0.3)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
           />
           <Tooltip
-            content={() => null}
+            trigger="axis"
+            content={<SyncTooltip setHoveredPoint={setHoveredPoint} />}
             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
             isAnimationActive={false}
           />

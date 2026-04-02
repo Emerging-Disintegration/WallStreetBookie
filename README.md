@@ -1,32 +1,78 @@
 # WallStreetBookie
-![WallStreetBookie Home Page](WallStBookie.jpg)
 
-A desktop options scanner that finds OTM (out-of-the-money) contracts projected to hit a user-defined profit target. Built with Python + pywebview on the backend and React + Vite on the frontend. Made with high risk tolerance day traders in mind, but applicable in a variety of use cases.
+![Screenshot: WallStreetBookie Home Page](app_screenshots/home_page.jpg)
 
-## What It Does
+**WallStreetBookie** is a high-performance desktop options scanner designed for day traders to find out-of-the-money (OTM) contracts hitting specific profit targets. The application features a persistent market ticker strip and real-time VIX context, providing traders with an immediate sense of market sentiment and volatility as they navigate the UI. Built with a robust Python backend and a modern React frontend, it provides powerful simulation tools to identify and analyze high-potential trades.
 
-Enter a ticker, expiration date, and desired gain percentage — WallStreetBookie scans the options chain and returns contracts that could yield your target return if the underlying moves to the strike price. It also surfaces the most active options chains by volume so you can find where the action is.
+## 🚀 Key Features
 
-### Features
+### 🔍 Profit Calculator (Options Scanner)
 
-- **Profit Calculator** — scan for OTM calls, puts, or both on any ticker
-- **Hottest Stocks mode** — auto-scan the top 3 most active options chains instead of a single ticker
-- **Most Active Chains** — ranked view of the highest-volume options chains
-- **Market Ticker Strip** — live SPY, QQQ, IWM, and VIX prices with performance indicators
-- **Watchlist** — save and track favorite tickers with live price updates
-- **P/L Chart** — Black-Scholes powered profit/loss curve with adjustable DTE slider
+The core of WallStreetBookie. Find contracts that match your specific risk/reward profile.
 
-## Tech Stack
+- **Smart Filtering**: Input a ticker, expiration date, and a target "Times Gain" (multiplier). The scanner filters thousands of contracts to find only those projected to hit your target.
+- **Call/Put Flexibility**: Toggle between scanning for Calls, Puts, or both simultaneously.
+- **Hottest Stocks Mode**: One-click scan for the top 3 most active options chains in the market, saving you the time of manual ticker entry.
+- **Data Normalization**: Handles varied date formats and API quirks behind the scenes to ensure consistent results.
 
-| Layer | Tech |
-|-------|------|
-| Desktop shell | [pywebview](https://pywebview.flowrl.com/) |
-| Frontend | React 19 + Vite |
-| Backend | Python 3.12 |
-| Data | yfinance, yahoo-fin, finnhub, beautifulsoup4, selenium |
-| Package mgmt | Poetry (Python), npm (JS) |
+![SCREENSHOT: PROFIT_CALCULATOR](app_screenshots/profit_calulator.jpg)
 
-## Getting Started
+![Screenshot: Results Table](app_screenshots/results.jpg)
+
+
+---
+
+### 🔥 Most Active Options Chains
+
+Identify where the "smart money" and retail volume are flowing.
+
+- **Ranked Volume**: A dedicated view of the highest-volume options chains across the market.
+- **Sentiment Analysis**: Automatically calculates Put/Call ratios with a 0.7 "Bullish" threshold to highlight market sentiment at a glance.
+- **ETF vs. Equity**: Switch between broad market ETFs and individual equity chains to find specialized opportunities.
+
+![SCREENSHOT: MOST_ACTIVE_TABLE](app_screenshots/most_active_table.jpg)
+
+---
+
+### ⭐ Unified Watchlist & Multi-Timeframe Performance
+
+WallStreetBookie offers a unique, high-efficiency watchlist that does more than just track prices. It provides a "bird's-eye view" of your entire group of favorite stocks across multiple horizons simultaneously.
+
+- **Multi-Horizon Performance**: A standout feature that allows you to instantly toggle the performance of your *entire* watchlist across six critical timeframes: **1D, 5D, 1M, 6M, YTD, and 1Y**. This unparalleled convenience enables traders to spot relative strength and emerging trends across their custom basket of stocks without the friction of checking individual charts.
+- **Dynamic Pricing**: Real-time stock price tracking integrated directly into the list view.
+- **One-Click Curation**: Star any ticker directly from the search results or the "Most Active" tables to instantly add or remove it from your tracking list.
+- **Persistent Local Storage**: Your watchlist is stored locally in a lightweight JSON format, ensuring your data is private, portable, and persists across application updates.
+
+![SCREENSHOT: WATCHLIST](app_screenshots/watchlist.jpg)
+
+---
+
+### 📉 P/L Charting & Decay Simulation
+
+Visualize your potential outcomes with a sophisticated charting engine.
+
+- **Black-Scholes Modeling**: Professional-grade P/L curves calculated using real-time Greek data.
+- **Live DTE Slider**: Simulate time decay (Theta) by dragging the DTE slider. Watch the curve flatten or expand in real-time to see how time affects your trade.
+- **Metrics Bar**: A persistent HUD above the chart showing Stock Price, P/L, and Contract Value at any point on the curve. Updates instantly as you hover.
+- **Reference Overlays**: Clear indicators for Strike Price, Current Underlying Price, and the critical Breakeven line.
+
+![SCREENSHOT: PNL_CHART](app_screenshots/pnl_chart.jpg)
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Desktop Shell** | [pywebview](https://pywebview.flowrl.com/) (Python 3.12) |
+| **Frontend** | React 19 + Vite + Recharts |
+| **Backend** | Python 3.12 with JS Bridge (`api.py`) |
+| **Data Layer** | Custom wrappers for `yfinance`, `yahoo-fin`, `finnhub`, and `beautifulsoup4` |
+| **Styling** | Vanilla CSS (Glassmorphism / Cyberpunk aesthetic) |
+
+---
+
+## ⚙️ Getting Started
 
 ### Prerequisites
 
@@ -34,44 +80,43 @@ Enter a ticker, expiration date, and desired gain percentage — WallStreetBooki
 - Node.js 18+
 - Poetry (`pip install poetry`)
 
-### Install
+### Installation
 
-```bash
-# Python dependencies
-cd src
-poetry install
+1. **Python Dependencies**:
 
-# Frontend dependencies
-cd frontend
-npm install
-```
+   ```bash
+   cd src
+   poetry install
+   ```
 
-### Run (dev mode)
+2. **Frontend Dependencies**:
 
-```bash
-cd src
-WALLSTBOOKIE_DEV=1 python -m backend.main
-```
+   ```bash
+   cd src/frontend
+   npm install
+   ```
 
-This starts the Vite dev server and opens the pywebview window pointed at `localhost:5173`.
+### Running the Application
 
-### Run (production)
+- **Development Mode**: Spawns a Vite dev server and opens the pywebview window with hot-reloading.
 
-```bash
-# Build the frontend first
-cd src/frontend
-npm run build
+  ```bash
+  cd src
+  WALLSTBOOKIE_DEV=1 python -m backend.main
+  ```
 
-# Then launch
-cd ..
-python -m backend.main
-```
+- **Production Mode**: Build the frontend first, then launch the standalone desktop app.
 
-## Status
+  ```bash
+  cd src/frontend
+  npm run build
+  cd ..
+  python -m backend.main
+  ```
 
-Functional and in active polish — core scanning, P/L charting, and watchlist are all working. Known open issue: DTE slider drag triggers window move on macOS (pywebview 6.1 intercepts drags below the JS layer).
+---
 
-## License
+## 📜 License
 
 Copyright © 2026. All rights reserved.
 
