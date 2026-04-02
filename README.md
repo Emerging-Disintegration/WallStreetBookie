@@ -14,11 +14,11 @@ The core of WallStreetBookie. Find contracts that match your specific risk/rewar
 - **Call/Put Flexibility**: Toggle between scanning for Calls, Puts, or both simultaneously.
 - **Hottest Stocks Mode**: One-click scan for the top 3 most active options chains in the market, saving you the time of manual ticker entry.
 
-## Set Your Parameters
+#### Set Your Parameters
 
 ![SCREENSHOT: PROFIT_CALCULATOR](app_screenshots/profit_calulator.jpg)
 
-## Look Through Your Options (*Pun Intended*)
+#### Look Through Your Options (*Pun Intended*)
 
 ![Screenshot: Results Table](app_screenshots/results.jpg)
 
