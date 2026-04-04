@@ -119,6 +119,5 @@ Visualize your potential outcomes with a sophisticated charting engine.
 
 ## 📜 License
 
-Copyright © 2026. All rights reserved.
-
-This software and its source code are proprietary. Unauthorized copying, modification, distribution, or commercial use — in whole or in part — is strictly prohibited without explicit written permission from the author.
+GNU AFFERO GENERAL PUBLIC LICENSE 
+- Version 3, 19 November 2007
