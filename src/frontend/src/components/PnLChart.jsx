@@ -220,11 +220,11 @@ export default function PnLChart({
         </div>
       </div>
 
-      <div className="pnl-chart-body">
+      <div className="pnl-chart-body" style={{ display: 'flex', justifyContent: 'center' }}>
         <ResponsiveContainer width="100%" height={250}>
         <AreaChart
           data={pnlData}
-          margin={{ top: 20, right: 30, bottom: 30, left: 70 }}
+          margin={{ top: 30, right: 80, bottom: 35, left: 20 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -247,6 +247,7 @@ export default function PnLChart({
             axisLine={false}
             tickLine={false}
             ticks={ticks}
+            label={{ value: 'Stock Price', position: 'insideBottom', offset: -5, fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
           />
           <YAxis
             tick={<CustomYAxisTick />}
@@ -255,6 +256,7 @@ export default function PnLChart({
             width={130}
             domain={['auto', 'auto']}
             ticks={yTicks}
+            label={{ value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -50 }}
           />
           <Area
             type="linear"
