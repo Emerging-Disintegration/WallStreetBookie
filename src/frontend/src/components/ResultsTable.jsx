@@ -48,7 +48,11 @@ export default function ResultsTable({ results, watchlistTickers = [], onRefresh
 
   // parse IV from row data: "35.1%" → 0.351
   const getRowIv = (row) => {
-    const raw = String(row.iv || row.IV || '30').replace('%', '');
+    const rawIv = row.iv || row.IV;
+    if (!rawIv) {
+      console.warn('IV missing from row data, using 30% default', row);
+    }
+    const raw = String(rawIv || '30').replace('%', '');
     return parseFloat(raw) / 100;
   };
 

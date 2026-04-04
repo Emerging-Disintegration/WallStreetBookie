@@ -3,7 +3,7 @@
 import threading
 from datetime import datetime
 import yfinance as yf
-from util.scan import result_chain, get_t
+from util.scan import result_chain, get_t, r as risk_free_rate
 from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
 from util.chains import most_active_stock_chains, most_active_etf_chains
 from util.volume import get_call_put_volume
@@ -211,7 +211,7 @@ class Api:
                 dte = 0
                 max_dte = 0
 
-            result = calculate_contract_value(strike, option_type, current_price, dte=dte, iv=iv, price_range_pct=price_range_pct)
+            result = calculate_contract_value(strike, option_type, current_price, dte=dte, iv=iv, risk_free_rate=risk_free_rate, price_range_pct=price_range_pct)
             result["maxDte"] = round(max_dte, 2)
             return {"success": True, "data": result}
         except Exception as e:

@@ -12,6 +12,39 @@ function formatPnL(v) {
   return `${sign}${Math.abs(v).toLocaleString()}`;
 }
 
+// custom Y-axis tick — shifts bottom tick up to avoid X-axis collision
+const CustomYAxisTick = ({ x, y, payload, index }) => {
+  const offsetY = index === 0 ? -10 : 0;
+  return (
+    <text
+      x={x}
+      y={y + offsetY}
+      textAnchor="end"
+      fill="#777"
+      fontSize={11}
+      fontFamily="Fira Code, monospace"
+    >
+      {formatPnL(payload.value)}
+    </text>
+  );
+};
+
+// custom X-axis tick
+const CustomXAxisTick = ({ x, y, payload }) => {
+  return (
+    <text
+      x={x}
+      y={y}
+      textAnchor="middle"
+      fill="#777"
+      fontSize={11}
+      fontFamily="Fira Code, monospace"
+    >
+      {`$${Math.round(payload.value)}`}
+    </text>
+  );
+};
+
 // compute round-number ticks for an axis
 function niceTickValues(data, key = 'price', targetTicks = 12) {
   if (!data || data.length < 2) return undefined;
@@ -28,11 +61,12 @@ function niceTickValues(data, key = 'price', targetTicks = 12) {
 
   const start = Math.floor(min / step) * step;
   const ticks = [];
-  // Use a small epsilon to avoid missing the last tick due to precision
   for (let v = start; v <= max + (step * 0.1); v += step) {
     ticks.push(parseFloat(v.toFixed(10)));
   }
-  return ticks.length > 1 ? ticks : undefined;
+  // drop ticks below data range to prevent phantom edge labels
+  const filtered = ticks.filter((t) => t >= min);
+  return filtered.length > 1 ? filtered : undefined;
 }
 
 // format DTE float into human-readable label
@@ -190,7 +224,7 @@ export default function PnLChart({
         <ResponsiveContainer width="100%" height={250}>
         <AreaChart
           data={pnlData}
-          margin={{ top: 20, right: 30, bottom: 25, left: 60 }}
+          margin={{ top: 20, right: 30, bottom: 30, left: 70 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -209,19 +243,15 @@ export default function PnLChart({
             dataKey="price"
             type="number"
             domain={['dataMin', 'dataMax']}
-            tick={{ fill: '#777', fontSize: 11, fontFamily: 'Fira Code, monospace' }}
-            tickMargin={20}
+            tick={<CustomXAxisTick />}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `$${Math.round(v)}`}
             ticks={ticks}
           />
           <YAxis
-            tick={{ fill: '#777', fontSize: 11, fontFamily: 'Fira Code, monospace' }}
-            tickMargin={20}
+            tick={<CustomYAxisTick />}
             axisLine={false}
             tickLine={false}
-            tickFormatter={formatPnL}
             width={130}
             domain={['auto', 'auto']}
             ticks={yTicks}

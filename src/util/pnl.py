@@ -2,7 +2,6 @@ import math
 
 
 def _norm_cdf(x):
-    """Standard normal CDF using math.erf (no scipy needed)."""
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
