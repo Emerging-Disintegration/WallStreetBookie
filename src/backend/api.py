@@ -8,6 +8,7 @@ from util.stock_info import get_current_price, get_percent_change, get_option_st
 from util.chains import most_active_stock_chains, most_active_etf_chains
 from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
+from util.settings import SettingsManager
 from util.pnl import calculate_contract_value
 
 # shared flag — Cocoa monkey-patch reads this to decide whether to move the window
@@ -20,6 +21,7 @@ class Api:
         self._window = None
         self._maximized = False
         self.watchlist_manager = WatchlistManager()
+        self._settings = SettingsManager()
 
     def set_window(self, window):
         self._window = window
@@ -218,3 +220,58 @@ class Api:
             return {"success": True, "data": result}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def get_settings(self) -> dict:
+        """Return all settings (API key masked for security)."""
+        try:
+            settings = self._settings.get_all()
+            # Mask the API key for display
+            key = settings.get('gemini_api_key', '')
+            if key and len(key) > 8:
+                settings['gemini_api_key_masked'] = key[:4] + '••••' + key[-4:]
+                settings['has_gemini_key'] = True
+            else:
+                settings['gemini_api_key_masked'] = ''
+                settings['has_gemini_key'] = bool(key)
+            # Don't send raw key to frontend
+            del settings['gemini_api_key']
+            return {"success": True, "data": settings}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def save_settings(self, settings: dict) -> dict:
+        """Save settings from the frontend."""
+        try:
+            # Validate ticker_strip max 3 items
+            if 'ticker_strip' in settings:
+                ticker_strip = settings['ticker_strip']
+                if ticker_strip is not None and len(ticker_strip) > 3:
+                    return {"success": False, "error": "Ticker strip can only have 3 stocks maximum"}
+            
+            current = self._settings.get_all()
+
+            # Only update the gemini key if a new one is provided
+            if 'gemini_api_key' in settings and settings['gemini_api_key']:
+                current['gemini_api_key'] = settings['gemini_api_key']
+
+            if 'ticker_strip' in settings:
+                current['ticker_strip'] = settings['ticker_strip']
+
+            if 'theme' in settings:
+                current['theme'] = settings['theme']
+
+            self._settings.save(current)
+            return {"success": True, "message": "Settings saved"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def verify_gemini_key(self, api_key: str) -> dict:
+        """Test the Gemini API key by making a lightweight request."""
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-2.0-flash')
+            response = model.generate_content("Say 'OK' in one word.")
+            return {"success": True, "message": "API key verified"}
+        except Exception as e:
+            return {"success": False, "error": f"Key verification failed: {str(e)}"}

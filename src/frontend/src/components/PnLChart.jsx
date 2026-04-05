@@ -279,9 +279,9 @@ export default function PnLChart({
           {/* strike price */}
           <ReferenceLine
             x={strike}
-            stroke="rgba(255,255,255,0.15)"
+            stroke='#790dd870'
             strokeWidth={1}
-            label={{ value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'rgba(255,255,255,0.3)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
+            label={{ value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'var(--purple)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
           />
           <Tooltip
             trigger="axis"

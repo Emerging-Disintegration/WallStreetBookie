@@ -1,9 +1,10 @@
 // Market ticker strip — SPY, QQQ, IWM
 import { useState, useEffect } from 'react';
 
-const TICKERS = ['SPY', 'QQQ', 'IWM'];
+const DEFAULT_TICKERS = ['SPY', 'QQQ', 'IWM'];
 
-export default function TickerStrip({ api, onVixData }) {
+export default function TickerStrip({ api, onVixData, symbols }) {
+  const tickers = symbols && symbols.length > 0 ? symbols : DEFAULT_TICKERS;
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -11,13 +12,13 @@ export default function TickerStrip({ api, onVixData }) {
     let cancelled = false;
 
     const fetchAll = async () => {
-      for (const ticker of TICKERS) {
+      for (const ticker of tickers) {
         try {
           const res = await api.get_stock_card_data(ticker);
           if (!cancelled && res.success) {
             setData(prev => ({ ...prev, [ticker]: res.data }));
           }
-        } catch (e) {
+        } catch {
           // silently skip failed ticker fetches
         }
       }
@@ -30,18 +31,19 @@ export default function TickerStrip({ api, onVixData }) {
             change: vixRes.data.change || 0,
           });
         }
-      } catch (e) {
+      } catch {
         // silently skip VIX fetch failure
       }
     };
 
     fetchAll();
     return () => { cancelled = true; };
-  }, [api]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+  }, [api, tickers]);
 
   return (
     <div className="ticker-strip">
-      {TICKERS.map((sym) => {
+      {tickers.map((sym) => {
         const item = data[sym];
         if (!item) {
           return (

@@ -9,6 +9,7 @@ import ResultsTable from './components/ResultsTable';
 import MostActiveTable from './components/MostActiveTable';
 import Watchlist from './components/Watchlist';
 import TitleBar from './components/TitleBar';
+import Settings from './components/Settings';
 
 function App() {
   const api = useApi();
@@ -19,7 +20,29 @@ function App() {
   const [vixData, setVixData] = useState(null);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
   const [expiration, setExpiration] = useState('');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [theme, setTheme] = useState('default');
+  const [tickerStripSymbols, setTickerStripSymbols] = useState([]);
   const refreshTimerRef = useRef(null);
+
+  // Load theme on mount
+  useEffect(() => {
+    if (api) {
+      api.get_settings().then(resp => {
+        if (resp.success) {
+          setTheme(resp.data.theme || 'default');
+          if (resp.data.ticker_strip && resp.data.ticker_strip.length > 0) {
+            setTickerStripSymbols(resp.data.ticker_strip);
+          }
+        }
+      });
+    }
+  }, [api]);
+
+  // Apply theme as data attribute on root element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const refreshWatchlist = useCallback(async () => {
     if (!api) return;
@@ -116,7 +139,7 @@ function App() {
 
   return (
     <>
-      <TitleBar />
+      <TitleBar onSettingsOpen={() => setSettingsOpen(true)} />
 
       {/* Background layers */}
       <TickerTapeBackground />
@@ -139,7 +162,7 @@ function App() {
         </header>
 
         {/* Market tickers */}
-        <TickerStrip api={api} onVixData={setVixData} />
+        <TickerStrip api={api} onVixData={setVixData} symbols={tickerStripSymbols} />
 
         {/* Navigation + VIX */}
         <div className="tab-row">
@@ -196,6 +219,15 @@ function App() {
           />
         )}
       </main>
+
+      {/* Settings overlay */}
+      <Settings
+        api={api}
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onThemeChange={setTheme}
+        onTickerStripChange={setTickerStripSymbols}
+      />
     </>
   );
 }

@@ -1,5 +1,5 @@
 // Custom window controls for frameless mode
-function TitleBar() {
+function TitleBar({ onSettingsOpen }) {
   const close    = () => window.pywebview.api.close_window();
   const minimize = () => window.pywebview.api.minimize_window();
   const maximize = () => window.pywebview.api.toggle_maximize();
@@ -15,6 +15,9 @@ function TitleBar() {
         </button>
         <button className="wb-btn wb-maximize" onClick={maximize} title="Maximize" aria-label="Maximize">
           <span className="wb-icon wb-expand" />
+        </button>
+        <button className="titlebar-settings-btn" onClick={onSettingsOpen} title="Settings" aria-label="Settings">
+          ⚙
         </button>
       </div>
       <div className="title-bar-drag" />
