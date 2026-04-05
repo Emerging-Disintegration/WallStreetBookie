@@ -1,7 +1,9 @@
 // Watchlist tab — shows saved tickers with price, change, and remove functionality
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import GlowCard from './GlowCard';
 import ToggleGroup from './ToggleGroup';
+import TagFilter from './TagFilter';
+import TagEditor from './TagEditor';
 
 const RANGES = ['1D', '5D', '1M', '6M', 'YTD', '1Y'];
 
@@ -12,6 +14,9 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
   const [removing, setRemoving] = useState({});
   const [error, setError] = useState(null);
   const [rangeLoading, setRangeLoading] = useState(false);
+  const [sortDirection, setSortDirection] = useState('off');
+  const [activeTag, setActiveTag] = useState(null);
+  const [editingTagsFor, setEditingTagsFor] = useState(null);
 
   const fetchWithRange = useCallback(async (r) => {
     if (!api) return;
@@ -64,6 +69,28 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
 
   const displayTickers = localTickers ?? tickers;
 
+  const allTags = useMemo(() => {
+    if (!displayTickers) return [];
+    const tagSet = new Set();
+    displayTickers.forEach(t => (t.tags || []).forEach(tag => tagSet.add(tag)));
+    return [...tagSet].sort();
+  }, [displayTickers]);
+
+  // Filter by tag first, then sort by % change
+  const displayList = useMemo(() => {
+    if (!displayTickers) return [];
+    let list = [...displayTickers];
+    if (activeTag) {
+      list = list.filter(t => (t.tags || []).includes(activeTag));
+    }
+    if (sortDirection === 'off') return list.reverse();
+    return list.sort((a, b) => {
+      const aVal = a.change ?? 0;
+      const bVal = b.change ?? 0;
+      return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
+    });
+  }, [displayTickers, activeTag, sortDirection]);
+
   if (!displayTickers) {
     return (
       <GlowCard className="watchlist-card">
@@ -71,8 +98,6 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
       </GlowCard>
     );
   }
-
-  const sorted = [...displayTickers].reverse();
 
   return (
     <>
@@ -96,12 +121,24 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
                 onChange={handleRangeChange}
                 small
               />
+              <button
+                className={`watchlist-sort-btn${sortDirection !== 'off' ? ' active' : ''}`}
+                onClick={() => {
+                  if (sortDirection === 'off') setSortDirection('desc');
+                  else if (sortDirection === 'desc') setSortDirection('asc');
+                  else setSortDirection('off');
+                }}
+                title={sortDirection === 'off' ? 'Sort by % change' : `Sorted ${sortDirection === 'desc' ? '↓' : '↑'}`}
+              >
+                {sortDirection === 'off' ? '↕' : sortDirection === 'desc' ? '↓' : '↑'}
+              </button>
               <span className="watchlist-count">
                 {displayTickers.length} ticker{displayTickers.length !== 1 ? 's' : ''}
               </span>
             </div>
+            <TagFilter tags={allTags} activeTag={activeTag} onTagSelect={setActiveTag} />
             <ul className={`watchlist-list${rangeLoading ? ' loading-dim' : ''}`}>
-              {sorted.map((item) => (
+              {displayList.map((item) => (
                 <li
                   key={item.symbol}
                   className={`watchlist-item${removing[item.symbol] ? ' removing' : ''}`}
@@ -118,8 +155,29 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
                         {item.change >= 0 ? '+' : ''}{Number(item.change).toFixed(2)}%
                       </span>
                     )}
+                    {(item.tags || []).map(tag => (
+                      <span key={tag} className="tag-pill small">#{tag}</span>
+                    ))}
                   </div>
                   <div className="watchlist-item-right">
+                    <button
+                      className="watchlist-tag-btn"
+                      onClick={(e) => { e.stopPropagation(); setEditingTagsFor(item.symbol); }}
+                      title="Edit tags"
+                    >
+                      🏷
+                    </button>
+                    {editingTagsFor === item.symbol && (
+                      <TagEditor
+                        currentTags={item.tags || []}
+                        onSave={async (newTags) => {
+                          await api.set_ticker_tags(item.symbol, newTags);
+                          setEditingTagsFor(null);
+                          fetchWithRange(rangeRef.current);
+                        }}
+                        onClose={() => setEditingTagsFor(null)}
+                      />
+                    )}
                     <span className="watchlist-date mono">
                       {formatDate(item.added_at)}
                     </span>

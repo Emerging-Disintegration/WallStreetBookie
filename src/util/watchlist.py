@@ -33,6 +33,9 @@ class WatchlistManager:
 
     def get_all(self):
         data = self._load()
+        for item in data.get("tickers", []):
+            if 'tags' not in item:
+                item['tags'] = []
         return data.get("tickers", [])
 
     def add(self, symbol: str):
@@ -61,3 +64,23 @@ class WatchlistManager:
             self._save(data)
             return True, "Ticker removed"
         return False, "Ticker not found"
+
+    def set_tags(self, symbol, tags):
+        """Set tags for a given symbol."""
+        symbol = symbol.upper()
+        data = self._load()
+        for item in data['tickers']:
+            if item['symbol'] == symbol:
+                item['tags'] = [t.strip() for t in tags if t.strip()]
+                self._save(data)
+                return True, f"Tags set for {symbol}"
+        return False, f"{symbol} not in watchlist"
+
+    def get_all_tags(self):
+        """Return sorted, deduplicated list of all tags."""
+        data = self._load()
+        all_tags = set()
+        for item in data.get('tickers', []):
+            for tag in item.get('tags', []):
+                all_tags.add(tag)
+        return sorted(all_tags)

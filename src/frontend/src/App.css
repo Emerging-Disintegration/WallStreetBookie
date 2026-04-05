@@ -1539,3 +1539,133 @@ tbody tr.expanded { background: rgba(0, 255, 136, 0.05); }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Sort toggle button ─── */
+.watchlist-sort-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.watchlist-sort-btn.active {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
+.watchlist-sort-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* ─── Tag filter bar ─── */
+.tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 0;
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tag-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tag-pill:hover {
+  border-color: var(--purple);
+  color: var(--text-primary);
+}
+
+.tag-pill.active {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: white;
+}
+
+.tag-pill.small {
+  font-size: 0.6rem;
+  padding: 1px 6px;
+}
+
+/* ─── Tag editor popover ─── */
+.tag-editor-popover {
+  position: absolute;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 200px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.tag-editor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.tag-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  outline: none;
+  min-width: 50px;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 0.7rem;
+}
+
+.tag-save-btn {
+  background: var(--purple);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.watchlist-tag-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  padding: 0 4px;
+}
+
+.watchlist-tag-btn:hover {
+  opacity: 1;
+}

@@ -151,6 +151,22 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def set_ticker_tags(self, symbol, tags) -> dict:
+        """Set tags for a watchlist ticker."""
+        try:
+            success, msg = self.watchlist_manager.set_tags(symbol, tags)
+            return {"success": success, "message": msg}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_all_tags(self) -> dict:
+        """Return all unique tags from the watchlist."""
+        try:
+            tags = self.watchlist_manager.get_all_tags()
+            return {"success": True, "data": tags}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def _pct_change(self, ticker_obj, range_key: str, current_price: float):
         # compute percent change from range start to current price
         try:
@@ -183,6 +199,7 @@ class Api:
             enriched = []
             for item in items:
                 entry = dict(item)
+                entry['tags'] = item.get('tags', [])
                 try:
                     t = yf.Ticker(item['symbol'])
                     current = round(float(t.fast_info['last_price']), 2)
