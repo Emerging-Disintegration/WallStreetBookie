@@ -1,7 +1,5 @@
-import finnhub.client as fh 
-import os 
-from dotenv import load_dotenv
-import re 
+import yfinance as yf
+import re
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -11,31 +9,20 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 chrome_options.add_argument('--no-sandbox')
-import flet as ft
-load_dotenv()
 
-api_key = os.getenv('API_KEY')
-api = fh.Client(api_key=api_key)
 
 def get_current_price(stock: str) -> str:
-    quote = api.quote(stock)
-    current_price = quote['c']
-    return str(current_price)
+    t = yf.Ticker(stock)
+    return str(round(float(t.fast_info['last_price']), 2))
     
 
 def get_percent_change(stock: str) -> float:
-    quote = api.quote(stock)
-    percent_change = quote['dp']
-    return round(percent_change, 2)
-
-def percent_change_icon(percent_change: str) -> ft.Icon:
-    if percent_change.startswith('-'):
-        icon = ft.icons.ARROW_DOWNWARD
-        color = ft.colors.RED_400
-    else:
-        icon = ft.icons.ARROW_UPWARD
-        color = ft.colors.GREEN_400
-    return ft.Icon(icon, color = color, size = 20, weight = 200)
+    t = yf.Ticker(stock)
+    current = float(t.fast_info['last_price'])
+    prev = float(t.fast_info['previous_close'])
+    if prev <= 0:
+        return 0.0
+    return round((current - prev) / prev * 100, 2)
 
 def get_option_stats(ticker: str)-> dict:
     """
@@ -90,25 +77,3 @@ def get_option_stats(ticker: str)-> dict:
     metrics['IV Low'] = metrics['IV Low'].split('%')[0]
     return metrics
 
-def get_vix()-> float:
-    driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://www.cnbc.com/quotes/.VIX'
-    driver.get(url)
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    vix = float(soup.find('span', {'class': 'QuoteStrip-lastPrice'}).get_text())
-    driver.quit()
-    return vix
-
-def get_vix_percent_change()-> float:
-    driver = webdriver.Chrome(options=chrome_options)
-    url = 'https://www.cnbc.com/quotes/.VIX'
-    driver.get(url)
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    try:
-        vix_percent_change = soup.find('span', {'class': 'QuoteStrip-changeUp'}).get_text()
-    except AttributeError:
-        vix_percent_change = soup.find('span', {'class': 'QuoteStrip-changeDown'}).get_text()
-    driver.quit()
-    return float(vix_percent_change.strip('()%'))

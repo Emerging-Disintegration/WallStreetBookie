@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import GlowCard from './GlowCard';
 
-export default function MostActiveTable({ api }) {
+export default function MostActiveTable({ api, watchlistTickers = [], onToggleFavorite }) {
   const [chains, setChains] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +39,31 @@ export default function MostActiveTable({ api }) {
     setLoading(false);
   };
 
+  const toggleFavorite = async (e, ticker) => {
+    e.stopPropagation();
+    const symbol = ticker.toUpperCase();
+    const wasInWatchlist = isFaved(symbol);
+
+    if (wasInWatchlist) {
+      setChains(prev => prev.map(c => c.ticker === symbol ? { ...c, _removing: true } : c));
+    }
+
+    try {
+      const res = wasInWatchlist
+        ? await api.remove_favorite(symbol)
+        : await api.add_favorite(symbol);
+
+      if (res.success && onToggleFavorite) {
+        onToggleFavorite(symbol, !wasInWatchlist);
+      }
+    } catch {
+      // silently fail
+    }
+  };
+
+  const isFaved = (ticker) =>
+    watchlistTickers.some((t) => t.symbol === ticker.toUpperCase());
+
   return (
     <GlowCard className="active-card">
       <div className="active-header">
@@ -61,6 +86,7 @@ export default function MostActiveTable({ api }) {
           <caption className="sr-only">Most active options chains ranked by volume</caption>
           <thead>
             <tr>
+              <th className="col-star"></th>
               <th className="col-rank">#</th>
               <th>Ticker</th>
               <th>Total Vol</th>
@@ -80,6 +106,16 @@ export default function MostActiveTable({ api }) {
 
               return (
                 <tr key={i}>
+                  <td>
+                    <button
+                      className={`fav-btn${isFaved(chain.ticker) ? ' active' : ''}`}
+                      onClick={(e) => toggleFavorite(e, chain.ticker)}
+                      disabled={chain._removing}
+                      aria-label={isFaved(chain.ticker) ? 'Remove from watchlist' : 'Add to watchlist'}
+                    >
+                      {isFaved(chain.ticker) ? '★' : '☆'}
+                    </button>
+                  </td>
                   <td className={`${rankClass} col-rank`}>
                     {i + 1}
                   </td>

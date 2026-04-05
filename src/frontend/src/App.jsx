@@ -1,5 +1,5 @@
 // Root component — manages tabs, search state, and layout
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './hooks/useApi';
 import TickerTapeBackground from './components/TickerTapeBackground';
 import TickerStrip from './components/TickerStrip';
@@ -19,6 +19,7 @@ function App() {
   const [vixData, setVixData] = useState(null);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
   const [expiration, setExpiration] = useState('');
+  const refreshTimerRef = useRef(null);
 
   const refreshWatchlist = useCallback(async () => {
     if (!api) return;
@@ -31,6 +32,23 @@ function App() {
       // Silent fail — watchlist will show as empty
     }
   }, [api]);
+
+  const scheduleDebouncedRefresh = useCallback(() => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
+      refreshWatchlist();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+    }, 300);
+  }, [refreshWatchlist]);
+
+  const handleToggleFavorite = useCallback((symbol, isAdding) => {
+    if (isAdding) {
+      setWatchlistTickers(prev => [...prev, { symbol }]);
+    } else {
+      setWatchlistTickers(prev => prev.filter(t => t.symbol !== symbol));
+    }
+    scheduleDebouncedRefresh();
+  }, [scheduleDebouncedRefresh]);
 
   // Fetch watchlist on app mount
   useEffect(() => {
@@ -112,7 +130,7 @@ function App() {
           <div className="header-center">
             <div className="header-left">
               <span className="logo">WallStreetBookie</span>
-              <span className="version">v0.3.1</span>
+              <span className="version">v0.3.2</span>
             </div>
             <p className="subtitle">
               Find your next YOLO in seconds!
@@ -157,7 +175,7 @@ function App() {
             <ResultsTable
               results={results}
               watchlistTickers={watchlistTickers}
-              onRefresh={refreshWatchlist}
+              onToggleFavorite={handleToggleFavorite}
               api={api}
               expiration={expiration}
             />
@@ -166,14 +184,14 @@ function App() {
 
         {/* Most Active tab */}
         {activeTab === 'active' && (
-          <MostActiveTable api={api} />
+          <MostActiveTable api={api} watchlistTickers={watchlistTickers} onToggleFavorite={handleToggleFavorite} />
         )}
 
         {/* Watchlist tab */}
         {activeTab === 'watchlist' && (
           <Watchlist
             tickers={watchlistTickers}
-            onRefresh={refreshWatchlist}
+            onToggleFavorite={handleToggleFavorite}
             api={api}
           />
         )}

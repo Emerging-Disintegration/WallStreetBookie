@@ -5,7 +5,7 @@ import ToggleGroup from './ToggleGroup';
 
 const RANGES = ['1D', '5D', '1M', '6M', 'YTD', '1Y'];
 
-export default function Watchlist({ tickers, onRefresh, api }) {
+export default function Watchlist({ tickers, onToggleFavorite, api }) {
   const [localTickers, setLocalTickers] = useState(null);
   const [range, setRange] = useState('1D');
   const rangeRef = useRef('1D');
@@ -19,7 +19,9 @@ export default function Watchlist({ tickers, onRefresh, api }) {
     try {
       const res = await api.get_watchlist_with_prices(r);
       if (res.success) setLocalTickers(res.data);
-    } catch (e) {}
+    } catch {
+      // silently fail
+    }
     setRangeLoading(false);
   }, [api]);
 
@@ -42,8 +44,8 @@ export default function Watchlist({ tickers, onRefresh, api }) {
     setError(null);
     try {
       const res = await api.remove_favorite(symbol);
-      if (res.success) {
-        await onRefresh(); // updates tickers prop → triggers useEffect above
+      if (res.success && onToggleFavorite) {
+        onToggleFavorite(symbol, false);
       } else {
         setError(`Failed to remove ${symbol} from watchlist`);
       }

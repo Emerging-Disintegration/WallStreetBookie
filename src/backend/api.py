@@ -4,7 +4,7 @@ import threading
 from datetime import datetime
 import yfinance as yf
 from util.scan import result_chain, get_t, r as risk_free_rate
-from util.stock_info import get_current_price, get_percent_change, get_option_stats, get_vix
+from util.stock_info import get_current_price, get_percent_change, get_option_stats
 from util.chains import most_active_stock_chains, most_active_etf_chains
 from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
@@ -66,15 +66,15 @@ class Api:
             return {"success": False, "error": str(e)}
 
     def get_stock_card_data(self, ticker: str) -> dict:
-        # fetches price + percent change in one call
         try:
-            price = get_current_price(ticker)
-            change = get_percent_change(ticker)
+            t = yf.Ticker(ticker)
+            price = round(float(t.fast_info['last_price']), 2)
+            change = self._pct_change(t, '1D', price)
             return {
                 "success": True,
                 "data": {
                     "ticker": ticker,
-                    "price": price,
+                    "price": str(price),
                     "change": change
                 }
             }
@@ -83,8 +83,10 @@ class Api:
 
     def get_vix_value(self) -> dict:
         try:
-            vix = get_vix()
-            return {"success": True, "data": vix}
+            t = yf.Ticker('^VIX')
+            price = round(float(t.fast_info['last_price']), 2)
+            change = self._pct_change(t, '1D', price)
+            return {"success": True, "data": {"price": price, "change": change}}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

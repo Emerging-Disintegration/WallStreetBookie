@@ -3,7 +3,7 @@ import { useState, useRef, Fragment, useEffect } from 'react';
 import GlowCard from './GlowCard';
 import PnLChart from './PnLChart';
 
-export default function ResultsTable({ results, watchlistTickers = [], onRefresh, api, expiration }) {
+export default function ResultsTable({ results, watchlistTickers = [], onToggleFavorite, api, expiration }) {
   const [togglingTickers, setTogglingTickers] = useState({});
   const [expandedRow, setExpandedRow] = useState(null);
   const [pnlData, setPnlData] = useState(null);
@@ -36,11 +36,11 @@ export default function ResultsTable({ results, watchlistTickers = [], onRefresh
         ? await api.remove_favorite(symbol)
         : await api.add_favorite(symbol);
 
-      if (res.success) {
-        await onRefresh();
+      if (res.success && onToggleFavorite) {
+        onToggleFavorite(symbol, !wasInWatchlist);
       }
-    } catch (e) {
-      // Revert handled by not updating watchlist state
+    } catch {
+      // silently fail
     }
 
     setTogglingTickers((prev) => ({ ...prev, [symbol]: false }));

@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "src"
-version = "0.3.1"
+name = "WallStreetBookie"
+version = "0.3.2"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Terrance Williams"]
 readme = "README.md"
 packages = [
     { include = "util" },
@@ -14,19 +14,11 @@ python = "^3.12"
 pandas = "^2.2.3"
 numpy = "^2.2.0"
 scipy = "^1.15.0"
-yahoo-fin = "^0.8.9.1"
-flet = "^0.26.0"
 ipykernel = "^6.29.5"
-pandas-datareader = "^0.10.0"
 yfinance = "^1.2.0"
 beautifulsoup4 = "^4.13.3"
 selenium = "^4.29.0"
-matplotlib = "^3.10.1"
-simpledatatable = "^0.3.4"
-finnhub-python = "^2.4.23"
 python-dotenv = "^1.1.0"
-plotly = "^6.0.1"
-html5lib = "^1.1"
 pywebview = "^6.1"
 
 

@@ -23,12 +23,11 @@ export default function TickerStrip({ api, onVixData }) {
       }
       try {
         const vixRes = await api.get_vix_value();
-        const changeRes = await api.get_change('^VIX');
         if (!cancelled && vixRes.success && onVixData) {
           onVixData({
             ticker: 'VIX',
-            price: vixRes.data,
-            change: changeRes.success ? changeRes.data : 0,
+            price: vixRes.data.price,
+            change: vixRes.data.change || 0,
           });
         }
       } catch (e) {

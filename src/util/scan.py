@@ -1,34 +1,15 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
+import yfinance as yf
 from scipy.stats import norm
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from datetime import datetime, time, timedelta, timezone
 from util.yahoo_fin_options import get_options_chain
-from dotenv import load_dotenv
-
-load_dotenv()
-
-chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument('--no-sandbox')
-
-# Cache variables
 
 
-def get_r() -> float:    
-    # Use the CNBC.com to get the risk-free interest rate
-    url = 'https://www.cnbc.com/quotes/US3M'
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(url)
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    rate = soup.find('span', {'class': 'QuoteStrip-lastPrice'}).get_text()
-    driver.quit()
-    rate: float = float(rate.strip('%')) / 100  # Convert the percentage to a float
-    return rate
+def get_r() -> float:
+    # 13-week T-bill rate from Yahoo Finance
+    t = yf.Ticker('^IRX')
+    return float(t.fast_info['last_price']) / 100
 
 def get_t(exp):
     # Parse expiration date and set to 4pm EST
