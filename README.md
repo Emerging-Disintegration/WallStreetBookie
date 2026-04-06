@@ -1,8 +1,8 @@
 # WallStreetBookie
 
-![Screenshot: WallStreetBookie Home Page](app_screenshots/home_page.jpg)
+![Screenshot: WallStreetBookie Home Page](app_screenshots/demo.mp4)
 
-**WallStreetBookie** is a high-performance desktop options scanner designed for day traders to find out-of-the-money (OTM) contracts hitting specific profit targets. The application features a persistent market ticker strip and real-time VIX context, providing traders with an immediate sense of market sentiment and volatility as they navigate the UI. Built with a robust Python backend and a modern React frontend, it provides powerful simulation tools to identify and analyze high-potential trades.
+**WallStreetBookie** is a free desktop options scanner designed for day/swing traders to find out-of-the-money (OTM) contracts hitting specific profit targets. The application features a editable market ticker strip and real-time VIX context, providing traders with an immediate sense of market sentiment and volatility as they navigate the UI. Built with a  Python backend and a  React frontend, it provides the tools to identify and analyze high-potential trades.
 
 ## 🚀 Key Features
 
@@ -24,6 +24,22 @@ The core of WallStreetBookie. Find contracts that match your specific risk/rewar
 
 ---
 
+### 🤖 AI Risk Analysis
+
+Powered by Google Gemini, WallStreetBookie provides AI-driven pre-trade risk assessment.
+
+- **Three-Point Audit**: Evaluates every trade against Liquidity, Price Target Feasibility, and IV Crush Risk
+
+- **Risk Scoring**: Classifies each trade as Low, Moderate, or Extreme risk
+
+- **Real-Time Analysis**: Click "Risk Analysis" on any contract to get an instant AI-powered review
+
+- **API Integration**: Connect your Gemini API key via Settings to enable this feature (free key available at aistudio.google.com)
+
+![VIDEO: AI Analyze](app_screenshots/ai-analyze.mp4)
+
+---
+
 ### 🔥 Most Active Options Chains
 
 Identify where the "smart money" and retail volume are flowing.
@@ -39,10 +55,13 @@ Identify where the "smart money" and retail volume are flowing.
 
 WallStreetBookie offers a unique watchlist that provides a "bird's-eye view" of your entire group of favorite stocks across multiple horizons simultaneously.
 
-- **Multi-Horizon Performance**: A standout feature that allows you to instantly toggle the performance of your *entire* watchlist across six critical timeframes: **1D, 5D, 1M, 6M, YTD, and 1Y**. This unparalleled convenience enables traders to spot relative strength and emerging trends across their custom basket of stocks without the friction of checking individual charts.
-- **Dynamic Pricing**: Real-time stock price tracking integrated directly into the list view.
-- **One-Click Curation**: Star any ticker directly from the search results or the "Most Active" tables to instantly add or remove it from your tracking list.
-- **Persistent Local Storage**: Your watchlist is stored locally in a lightweight JSON format, ensuring your data is private, portable, and persists across application updates.
+- **Multi-Horizon Performance**: Toggle performance across six critical timeframes: **1D, 5D, 1M, 6M, YTD, and 1Y**. Instantly spot relative strength and emerging trends across your custom basket without checking individual charts.
+- **Dynamic Pricing**: Real-time stock price tracking integrated directly into the list view with automatic updates.
+- **Smart Sorting**: Sort your watchlist by performance change within any timeframe—instantly identify top and bottom performers.
+- **Tag Organization**: Organize and filter with custom tags. Add multiple labels to any ticker (e.g., "Growth", "Tech", "Swing-Trade") and filter by tag to focus on specific groups.
+- **Added-Date Tracking**: See when each ticker was added to your watchlist for historical context.
+- **One-Click Curation**: Star any ticker from search results or "Most Active" tables to instantly add or remove from your list.
+- **Persistent Local Storage**: Your watchlist is stored locally in `~/.wallstreetbookie/watchlist.json` with atomic writes, ensuring data integrity, privacy, and portability.
 
 ![SCREENSHOT: WATCHLIST](app_screenshots/watchlist.jpg)
 
@@ -68,7 +87,7 @@ Visualize your potential outcomes with a sophisticated charting engine.
 | **Desktop Shell** | [pywebview](https://pywebview.flowrl.com/) (Python 3.12) |
 | **Frontend** | React 19 + Vite + Recharts |
 | **Backend** | Python 3.12 with JS Bridge (`api.py`) |
-| **Data Layer** | Custom wrappers for `yfinance`, `finnhub`, and `beautifulsoup4` |
+| **Data Layer** | Custom wrappers for `yfinance` and `beautifulsoup4` |
 | **Styling** | Vanilla CSS (Glassmorphism / Cyberpunk aesthetic) |
 
 ---
@@ -119,5 +138,6 @@ Visualize your potential outcomes with a sophisticated charting engine.
 
 ## 📜 License
 
-GNU AFFERO GENERAL PUBLIC LICENSE 
+GNU AFFERO GENERAL PUBLIC LICENSE
+
 - Version 3, 19 November 2007

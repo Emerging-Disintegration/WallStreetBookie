@@ -141,7 +141,7 @@ def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
 
     df['iv'] = df['Implied Volatility'].str.replace(',', '').str.rstrip('%').astype(float) / 100
     df.insert(loc=0, column='Ticker', value=f'{stock}')
-    df = df[['Ticker', 'Strike', 'Last Price', 'Bid', 'Ask', 'Change', 'Open Interest', 'side', 'iv']]
+    df = df[['Ticker', 'Strike', 'Last Price', 'Bid', 'Ask', 'Change', 'Volume', 'Open Interest', 'side', 'iv']]
     df = df[df['iv'] > 0]
     df['t'] = T
 

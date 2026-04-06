@@ -2,6 +2,7 @@
 
 import threading
 from datetime import datetime
+import webview
 import yfinance as yf
 from util.scan import result_chain, get_t, r as risk_free_rate
 from util.stock_info import get_current_price, get_percent_change, get_option_stats
@@ -83,6 +84,7 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def get_vix_value(self) -> dict:
         try:
             t = yf.Ticker('^VIX')
@@ -99,12 +101,14 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def get_active_stocks(self) -> dict:
         try:
             stocks = most_active_stock_chains()
             return {"success": True, "data": stocks}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
 
     def get_active_etfs(self) -> dict:
         try:
@@ -126,12 +130,14 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def get_watchlist(self) -> dict:
         try:
             watchlist = self.watchlist_manager.get_all()
             return {"success": True, "data": watchlist}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
 
     def add_favorite(self, ticker: str) -> dict:
         try:
@@ -142,6 +148,7 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def remove_favorite(self, ticker: str) -> dict:
         try:
             success, message = self.watchlist_manager.remove(ticker)
@@ -151,6 +158,7 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def set_ticker_tags(self, symbol, tags) -> dict:
         """Set tags for a watchlist ticker."""
         try:
@@ -159,11 +167,39 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def get_all_tags(self) -> dict:
         """Return all unique tags from the watchlist."""
         try:
             tags = self.watchlist_manager.get_all_tags()
             return {"success": True, "data": tags}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+
+    def audit_trade(self, ticker, strike, option_type, dte, iv,
+                    bid, ask, volume, open_interest, current_price):
+        """Run Gemini-powered trade audit for the given option."""
+        try:
+            api_key = self._settings.get('gemini_api_key')
+            if not api_key:
+                return {"success": False, "error": "No Gemini API key configured. Add it in Settings."}
+
+            from util.trade_audit import audit_trade as run_audit
+            result = run_audit(
+                api_key=api_key,
+                ticker=ticker,
+                strike=float(strike),
+                option_type=option_type,
+                dte=float(dte),
+                iv=float(iv),
+                bid=float(bid),
+                ask=float(ask),
+                volume=int(volume),
+                open_interest=int(open_interest),
+                current_price=float(current_price)
+            )
+            return {"success": True, "data": result}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -192,6 +228,7 @@ class Api:
         except Exception:
             return None
 
+
     def get_watchlist_with_prices(self, range_key='1D') -> dict:
         # returns watchlist items enriched with current price and percent change
         try:
@@ -212,6 +249,7 @@ class Api:
             return {"success": True, "data": enriched}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
 
     def get_value_curve(self, strike, option_type, current_price, expiration='', dte_override=None, iv=0.3, price_range_pct=0.2) -> dict:
         try:
@@ -238,6 +276,7 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def get_settings(self) -> dict:
         """Return all settings (API key masked for security)."""
         try:
@@ -255,6 +294,7 @@ class Api:
             return {"success": True, "data": settings}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
 
     def save_settings(self, settings: dict) -> dict:
         """Save settings from the frontend."""
@@ -282,12 +322,13 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+
     def verify_gemini_key(self, api_key: str) -> dict:
         """Test the Gemini API key by making a lightweight request."""
         try:
             import google.generativeai as genai
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.0-flash')
+            model = genai.GenerativeModel('gemini-3-flash-preview')
             response = model.generate_content("Say 'OK' in one word.")
             return {"success": True, "message": "API key verified"}
         except Exception as e:

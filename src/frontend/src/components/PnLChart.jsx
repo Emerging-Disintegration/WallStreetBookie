@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, ReferenceLine, Tooltip
 } from 'recharts';
+import TradeAudit from './TradeAudit';
 
 // format dollar values with sign for Y-axis
 function formatPnL(v) {
@@ -93,7 +94,8 @@ const SyncTooltip = ({ active, payload, setHoveredPoint }) => {
 };
 
 export default function PnLChart({
-  data, currentPrice: initialCurrentPrice, premium, optionType, ticker, strike, maxDte, onDteChange
+  data, currentPrice: initialCurrentPrice, premium, optionType, ticker, strike, maxDte, onDteChange,
+  api, bid, volume, openInterest, iv
 }) {
   const [sliderPos, setSliderPos] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
@@ -317,6 +319,24 @@ export default function PnLChart({
           <span className="pnl-slider-value">{formatDte(displayDte)}</span>
         </div>
       </div>
+
+      {api && (
+        <TradeAudit
+          api={api}
+          tradeParams={{
+            ticker,
+            strike,
+            optionType,
+            dte: displayDte,
+            iv: iv || 0.3,
+            bid: bid || 0,
+            ask: premium || 0,
+            volume: volume || 0,
+            openInterest: openInterest || 0,
+            currentPrice: currentPrice
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "WallStreetBookie"
-version = "0.3.2"
+version = "0.4.1"
 description = ""
 authors = ["Terrance Williams"]
 readme = "README.md"
@@ -20,6 +20,7 @@ beautifulsoup4 = "^4.13.3"
 selenium = "^4.29.0"
 python-dotenv = "^1.1.0"
 pywebview = "^6.1"
+google-generativeai = "^0.8.6"
 
 
 [build-system]

@@ -60,7 +60,7 @@ function App() {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     refreshTimerRef.current = setTimeout(() => {
       refreshWatchlist();
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
     }, 300);
   }, [refreshWatchlist]);
 
@@ -153,10 +153,10 @@ function App() {
           <div className="header-center">
             <div className="header-left">
               <span className="logo">WallStreetBookie</span>
-              <span className="version">v0.3.2</span>
+              <span className="version">v0.4.1</span>
             </div>
             <p className="subtitle">
-              Find your next YOLO in seconds!
+              Get the inside line 🎰
             </p>
           </div>
         </header>

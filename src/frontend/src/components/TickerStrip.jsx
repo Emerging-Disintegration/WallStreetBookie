@@ -38,7 +38,7 @@ export default function TickerStrip({ api, onVixData, symbols }) {
 
     fetchAll();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
   }, [api, tickers]);
 
   return (

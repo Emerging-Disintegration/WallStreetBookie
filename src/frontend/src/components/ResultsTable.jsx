@@ -214,6 +214,11 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
                               strike={parseFloat(row.strike || row.Strike)}
                               maxDte={maxDte}
                               onDteChange={handleDteChange}
+                              api={api}
+                              bid={parseFloat(row.bid || row.Bid || 0)}
+                              volume={parseInt(row.volume || row.Volume || 0)}
+                              openInterest={parseInt(row.openInterest || row.OI || 0)}
+                              iv={getRowIv(row)}
                             />
                           )}
                         </div>
