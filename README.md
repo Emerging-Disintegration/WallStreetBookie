@@ -1,7 +1,6 @@
 # WallStreetBookie
 
-![Gif: App Demo](app_screenshots/demo.gif)
-
+<video src="https://github.com/user-attachments/assets/fa0342a6-ee9e-4a3a-a01d-a0381956b306" autoplay loop muted playsinline width="100%"></video>
 **WallStreetBookie** is a free desktop options scanner designed for day/swing traders to find out-of-the-money (OTM) contracts hitting specific profit targets. The application features a editable market ticker strip and real-time VIX context, providing traders with an immediate sense of market sentiment and volatility as they navigate the UI. Built with a  Python backend and a  React frontend, it provides the tools to identify and analyze high-potential trades.
 
 ## 🚀 Key Features
@@ -36,7 +35,7 @@ Powered by Google Gemini, WallStreetBookie provides AI-driven pre-trade risk ass
 
 - **API Integration**: Connect your Gemini API key via Settings to enable this feature (free key available at aistudio.google.com)
 
-![Gif: AI Analyze](app_screenshots/ai-analyze.gif)
+<video src="https://github.com/user-attachments/assets/a4bfd29a-1296-41a1-a32e-9fa1a08c2e0a" autoplay loop muted playsinline width="100%"></video>
 
 ---
 
