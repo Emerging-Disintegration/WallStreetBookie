@@ -39,9 +39,6 @@ Powered by Google Gemini, WallStreetBookie provides AI-driven pre-trade risk ass
 
 ---
 
-
-
-
 ### 🔥 Most Active Options Chains
 
 Identify where the "smart money" and retail volume are flowing.

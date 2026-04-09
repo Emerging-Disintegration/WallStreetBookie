@@ -207,7 +207,7 @@ class Api:
         # compute percent change from range start to current price
         try:
             if range_key == '1D':
-                prev = float(ticker_obj.fast_info['previous_close'])
+                prev = float(ticker_obj.fast_info['regularMarketPreviousClose'])
                 if prev > 0:
                     return round((current_price - prev) / prev * 100, 2)
                 return None

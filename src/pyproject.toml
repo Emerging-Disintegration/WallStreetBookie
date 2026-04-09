@@ -21,6 +21,7 @@ selenium = "^4.29.0"
 python-dotenv = "^1.1.0"
 pywebview = "^6.1"
 google-generativeai = "^0.8.6"
+lxml = "^6.0.2"
 
 
 [build-system]
