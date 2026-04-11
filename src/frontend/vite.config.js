@@ -9,4 +9,7 @@ export default defineConfig({
   // This is essential for pywebview to load the built files
   // from disk using a file:// URL.
   base: './',
+  server:{
+    host: true
+  }
 })

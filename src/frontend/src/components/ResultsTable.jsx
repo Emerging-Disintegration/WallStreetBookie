@@ -143,12 +143,12 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
           {results.length} contract{results.length !== 1 ? 's' : ''} found
         </span>
       </div>
-      <div style={{ overflowX: 'auto' }}>
+      <div className="table-scroll-container">
         <table>
           <caption className="sr-only">Options scan results</caption>
           <thead>
             <tr>
-              <th className="fav-header"><span className="sr-only">Favorite</span></th>
+              <th className="fav-header">☆</th>
               <th>Ticker</th>
               <th>Strike</th>
               <th>Last</th>

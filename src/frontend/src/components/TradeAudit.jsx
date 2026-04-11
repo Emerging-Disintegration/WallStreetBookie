@@ -71,7 +71,7 @@ export default function TradeAudit({ api, tradeParams }) {
         </button>
       )}
 
-      {loading && <div className="audit-loading">Auditing...</div>}
+      {loading && <div className="audit-loading">Analyzing Contract...</div>}
 
       {error && <div className="audit-error">{error}</div>}
 
@@ -106,7 +106,7 @@ export default function TradeAudit({ api, tradeParams }) {
           })}
 
           <button className="audit-reset-btn" onClick={() => setAudit(null)}>
-            Re-audit
+            Re-Analyze
           </button>
         </div>
       )}

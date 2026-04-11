@@ -115,12 +115,14 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
           <>
             <div className="watchlist-header">
               <span className="watchlist-label">YOUR WATCHLIST</span>
-              <ToggleGroup
-                options={RANGES}
-                value={range}
-                onChange={handleRangeChange}
-                small
-              />
+              <div className="watchlist-timeframe-scroll">
+                <ToggleGroup
+                  options={RANGES}
+                  value={range}
+                  onChange={handleRangeChange}
+                  small
+                />
+              </div>
               <button
                 className={`watchlist-sort-btn${sortDirection !== 'off' ? ' active' : ''}`}
                 onClick={() => {
@@ -155,9 +157,16 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
                         {item.change >= 0 ? '+' : ''}{Number(item.change).toFixed(2)}%
                       </span>
                     )}
-                    {(item.tags || []).map(tag => (
-                      <span key={tag} className="tag-pill small">#{tag}</span>
-                    ))}
+                    {item.tags && item.tags.length > 0 && (
+                      <span className="watchlist-tags">
+                        {item.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className="tag-pill small">#{tag}</span>
+                        ))}
+                        {item.tags.length > 2 && (
+                          <span className="tag-overflow">+{item.tags.length - 2}</span>
+                        )}
+                      </span>
+                    )}
                   </div>
                   <div className="watchlist-item-right">
                     <button

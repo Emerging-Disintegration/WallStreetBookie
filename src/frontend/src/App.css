@@ -17,6 +17,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
+
   --bg: #0a0a0f;
   --surface: rgba(18, 18, 26, 0.80);
   --surface-solid: #12121a;
@@ -60,6 +65,7 @@ body {
 /* ─── App Content Wrapper ─── */
 .app-content {
   width: 100%;
+  min-width: 538px;
   max-width: 960px;
   margin: 0 auto;
   position: relative;
@@ -330,6 +336,7 @@ body::after {
   align-items: center;
   justify-content: center;
   padding: 20px 0 12px;
+  padding-top: calc(20px + var(--safe-area-top));
   position: relative;
   z-index: 1;
 }
@@ -371,12 +378,41 @@ body::after {
 /* ─── Ticker Strip ─── */
 .ticker-strip {
   display: flex;
+  flex-wrap: wrap;
   padding: 10px 0 5px;
   border-bottom: none;
   margin-bottom: 16px;
   position: relative;
   z-index: 1;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* Force 3 rows, 1 column at minimum width */
+@media (max-width: 600px) {
+  .ticker-strip {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ticker-item {
+    width: 100%;
+    justify-content: center;
+  }
+  /* VIX always right-aligned */
+  .ticker-item.vix-item {
+    align-self: flex-end;
+    justify-content: flex-end;
+  }
+  /* Fix glow positioning - z-index 0 keeps glow behind ticker, not offset */
+  .ticker-item::before {
+    z-index: 0;
+    inset: -8px;
+  }
+}
+
+/* Scale logo for minimum width */
+@media (max-width: 600px) {
+  .logo { font-size: 1.8rem; }
 }
 .ticker-item {
   display: flex;
@@ -438,6 +474,8 @@ body::after {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 24px;
   position: relative;
   z-index: 1;
@@ -680,6 +718,29 @@ td.gain { color: var(--green); font-weight: 600; }
 td.call { color: var(--green) !important; font-weight: 700; }
 td.put { color: var(--magenta) !important; font-weight: 700; }
 
+/* Table scroll container for horizontal scrolling */
+.table-scroll-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sticky first column for table */
+table th:first-child,
+table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--surface-solid);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Ensure the header sticky column has correct z-index */
+table thead th:first-child {
+  z-index: 20;
+}
+
 /* ─── Most Active ─── */
 .active-card { margin-bottom: 24px; }
 .active-header {
@@ -769,6 +830,8 @@ th.col-rank, td.col-rank { text-align: center; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .watchlist-label {
   flex: 1;
@@ -890,24 +953,63 @@ th.col-rank, td.col-rank { text-align: center; }
   font-weight: 600;
 }
 
-/* ─── Favorite Star ─── */
-th.fav-header {
-  width: 36px;
-  padding-left: 16px;
-  padding-right: 4px;
+/* Watchlist timeframe scrollable pill menu */
+.watchlist-timeframe-scroll {
+  flex: 1;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding: 4px 0;
 }
-td.fav-cell {
-  width: 36px;
-  padding-left: 16px;
-  padding-right: 4px;
+.watchlist-timeframe-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+.watchlist-timeframe-scroll .toggle-group {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+/* Watchlist tag overflow */
+.watchlist-tags {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.tag-overflow {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-family: var(--mono);
+}
+
+/* ─── Favorite Star ─── */
+th.fav-header, th.col-star {
+  width: 40px;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+}
+td.fav-cell, td.col-star {
+  width: 40px;
+  padding: 10px 8px;
+  text-align: center;
 }
 .fav-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1;
-  padding: 2px 4px;
+  padding: 4px 6px;
   border-radius: 4px;
   color: var(--text-muted);
   transition: color 0.15s, transform 0.15s;
@@ -945,15 +1047,43 @@ td.fav-cell {
 
 /* Extra small screens — single column inputs */
 @media (max-width: 480px) {
-  .input-row.single { grid-template-columns: 1fr; }
-  .scan-btn { width: 100%; }
+  :root {
+    /* Scale down typography and spacing by 12% for mobile */
+    font-size: 0.88rem;
+    --spacing-scale: 0.88;
+  }
+  /* Stack input container - flex direction column */
+  .input-row { display: flex; flex-direction: column; gap: 10px; }
+  .input-row.single, .input-row.top3 { grid-template-columns: 1fr; display: flex; flex-direction: column; gap: 10px; }
+  .input-field { width: 100%; }
+  .input-field input { width: 100%; height: 38px; padding: 8px 12px; font-size: 0.85rem; }
+  .scan-btn { width: 100%; height: 38px; padding: 8px 20px; font-size: 0.8rem; }
+  /* Stack Call/Put toggle in 1fr 1fr grid on mobile */
+  .type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: center; padding: 8px 0; }
+  .type-label { margin-bottom: 0; }
+  .type-row .toggle-group { justify-self: start; }
+  .toggle-group { gap: 1px; }
+  .toggle-btn { padding: 5px 14px; font-size: 0.75rem; }
   .ticker-symbol { font-size: 1.1rem; }
   .ticker-price { font-size: 0.85rem; }
   .ticker-change { font-size: 0.7rem; }
   .logo { font-size: 1.4rem; }
+  .header { padding-top: calc(16px + var(--safe-area-top)); }
   .watchlist-item-left { gap: 10px; }
   .watchlist-symbol { font-size: 0.85rem; }
   th.fav-header, td.fav-cell { padding-left: 10px; }
+  /* VIX ticker scaling */
+  .vix-item .ticker-symbol { font-size: 1rem; }
+  .vix-item .ticker-price { font-size: 1rem; }
+  .vix-item .ticker-change { font-size: 0.65rem; }
+  /* PnL Chart mobile optimization */
+  .pnl-chart-wrapper { padding: 12px 16px 16px; }
+  .pnl-chart-title { font-size: 0.9rem; }
+  .pnl-chart-subtitle { font-size: 0.7rem; }
+  .pnl-metrics { gap: 16px; flex-wrap: wrap; }
+  .pnl-metric-label { font-size: 0.6rem; }
+  .pnl-metric-value { font-size: 0.75rem; }
+  .pnl-chart-container.open { min-height: 350px; }
 }
 
 /* ─── Focus indicators for interactive elements ─── */

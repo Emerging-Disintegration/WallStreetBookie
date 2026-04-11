@@ -81,12 +81,12 @@ export default function MostActiveTable({ api, watchlistTickers = [], onToggleFa
           </button>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-scroll-container">
           <table>
           <caption className="sr-only">Most active options chains ranked by volume</caption>
           <thead>
             <tr>
-              <th className="col-star"></th>
+              <th className="col-star">☆</th>
               <th className="col-rank">#</th>
               <th>Ticker</th>
               <th>Total Vol</th>
@@ -106,7 +106,7 @@ export default function MostActiveTable({ api, watchlistTickers = [], onToggleFa
 
               return (
                 <tr key={i}>
-                  <td>
+                  <td className="col-star">
                     <button
                       className={`fav-btn${isFaved(chain.ticker) ? ' active' : ''}`}
                       onClick={(e) => toggleFavorite(e, chain.ticker)}

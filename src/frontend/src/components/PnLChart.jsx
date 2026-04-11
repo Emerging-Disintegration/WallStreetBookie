@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
-  CartesianGrid, ReferenceLine, Tooltip
+  CartesianGrid, ReferenceLine, Tooltip, Legend
 } from 'recharts';
 import TradeAudit from './TradeAudit';
 
@@ -153,8 +153,6 @@ export default function PnLChart({
   if (!pnlData || pnlData.length === 0) return null;
 
   const prices = pnlData.map(d => d.price);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
 
   const ticks = niceTickValues(pnlData);
 
@@ -205,28 +203,11 @@ export default function PnLChart({
         </div>
       </div>
 
-      <div className="pnl-metrics">
-        <div className="pnl-metric">
-          <span className="pnl-metric-label">Stock Price:</span>
-          <span className="pnl-metric-value mono">${displayPoint.price.toFixed(2)}</span>
-        </div>
-        <div className="pnl-metric">
-          <span className="pnl-metric-label">P/L:</span>
-          <span className={`pnl-metric-value mono ${displayPoint.pnl >= 0 ? 'profit' : 'loss'}`}>
-            {displayPoint.pnl >= 0 ? '+' : ''}${displayPoint.pnl.toFixed(2)}
-          </span>
-        </div>
-        <div className="pnl-metric">
-          <span className="pnl-metric-label">Contract Value:</span>
-          <span className="pnl-metric-value mono">${displayPoint.value.toFixed(2)}</span>
-        </div>
-      </div>
-
       <div className="pnl-chart-body" style={{ display: 'flex', justifyContent: 'center' }}>
         <ResponsiveContainer width="100%" height={250}>
         <AreaChart
           data={pnlData}
-          margin={{ top: 30, right: 80, bottom: 35, left: 20 }}
+          margin={{ top: 30, right: 20, bottom: 45, left: 20 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -249,16 +230,17 @@ export default function PnLChart({
             axisLine={false}
             tickLine={false}
             ticks={ticks}
+            interval={0}
             label={{ value: 'Stock Price', position: 'insideBottom', offset: -5, fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
           />
           <YAxis
             tick={<CustomYAxisTick />}
             axisLine={false}
             tickLine={false}
-            width={130}
+            width={100}
             domain={['auto', 'auto']}
             ticks={yTicks}
-            label={{ value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -50 }}
+            label={{ value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -40 }}
           />
           <Area
             type="linear"
@@ -267,7 +249,7 @@ export default function PnLChart({
             strokeWidth={2}
             fill={`url(#fill-${gradId})`}
             dot={false}
-            activeDot={{ r: 4, fill: '#fff', strokeWidth: 0 }}
+            activeDot={{ r: 8, fill: '#fff', strokeWidth: 0 }}
             isAnimationActive={false}
           />
           {/* breakeven line at P/L = 0 */}
@@ -291,8 +273,27 @@ export default function PnLChart({
             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
             isAnimationActive={false}
           />
+          <Legend layout="horizontal" verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px', fontFamily: 'Fira Code, monospace', fontSize: '11px' }} />
         </AreaChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* HUD - moved below chart */}
+      <div className="pnl-metrics">
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">Stock Price:</span>
+          <span className="pnl-metric-value mono">${displayPoint.price.toFixed(2)}</span>
+        </div>
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">P/L:</span>
+          <span className={`pnl-metric-value mono ${displayPoint.pnl >= 0 ? 'profit' : 'loss'}`}>
+            {displayPoint.pnl >= 0 ? '+' : ''}${displayPoint.pnl.toFixed(2)}
+          </span>
+        </div>
+        <div className="pnl-metric">
+          <span className="pnl-metric-label">Contract Value:</span>
+          <span className="pnl-metric-value mono">${displayPoint.value.toFixed(2)}</span>
+        </div>
       </div>
 
       <div className="pnl-sliders">

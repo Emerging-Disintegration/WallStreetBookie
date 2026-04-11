@@ -136,7 +136,8 @@ def main():
         width=1200,
         height=850,
         resizable=True,
-        frameless=True
+        frameless=True,
+        min_size=(538, 1)
     )
     api.set_window(window)
 
