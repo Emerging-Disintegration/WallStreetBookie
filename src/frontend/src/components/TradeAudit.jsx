@@ -27,10 +27,12 @@ const RISK_COLORS = {
   Extreme: 'var(--red)'
 };
 
-export default function TradeAudit({ api, tradeParams }) {
+export default function TradeAudit({ api, tradeParams, isMobile }) {
   const [audit, setAudit] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const containerClass = isMobile ? 'trade-audit-panel trade-audit-mobile' : 'trade-audit-panel';
 
   const runAudit = async () => {
     setLoading(true);
@@ -64,7 +66,7 @@ export default function TradeAudit({ api, tradeParams }) {
   };
 
   return (
-    <div className="trade-audit-panel">
+    <div className={containerClass}>
       {!audit && !loading && (
         <button className="audit-btn" onClick={runAudit} disabled={loading}>
           Risk Analysis 

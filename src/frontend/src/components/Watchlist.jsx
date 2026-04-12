@@ -54,7 +54,7 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
       } else {
         setError(`Failed to remove ${symbol} from watchlist`);
       }
-    } catch (e) {
+    } catch {
       setError(`Failed to remove ${symbol} from watchlist`);
     }
     setRemoving((prev) => ({ ...prev, [symbol]: false }));

@@ -3,7 +3,7 @@ import { useState, useRef, Fragment, useEffect } from 'react';
 import GlowCard from './GlowCard';
 import PnLChart from './PnLChart';
 
-export default function ResultsTable({ results, watchlistTickers = [], onToggleFavorite, api, expiration }) {
+export default function ResultsTable({ results, watchlistTickers = [], onToggleFavorite, api, expiration, isMobile }) {
   const [togglingTickers, setTogglingTickers] = useState({});
   const [expandedRow, setExpandedRow] = useState(null);
   const [pnlData, setPnlData] = useState(null);
@@ -15,7 +15,7 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
   // Scroll chart into view when it appears
   useEffect(() => {
     if (pnlData && chartRowRef.current) {
-      chartRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      chartRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [pnlData]);
 
@@ -98,7 +98,7 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
         setPnlData(res.data);
         setMaxDte(res.data.maxDte || 30);
       }
-    } catch (e) {
+    } catch {
       if (requestCounter.current !== thisRequest) return;
     }
 
@@ -127,7 +127,7 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
       if (res.success) {
         setPnlData(res.data);
       }
-    } catch (e) {
+    } catch {
       if (requestCounter.current !== thisRequest) return;
     }
   };
@@ -198,7 +198,7 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
                     <td className="gain mono">{row.gain || row['% Gain']}</td>
                   </tr>
                   {isExpanded && (
-                    <tr className="pnl-chart-row" ref={chartRowRef}>
+                    <tr className={`pnl-chart-row pnl-chart-row-expanded${isMobile ? ' pnl-chart-row-mobile' : ''}`} ref={chartRowRef}>
                       <td colSpan={COL_COUNT} className="pnl-chart-cell">
                         <div className={`pnl-chart-container${pnlData || pnlLoading ? ' open' : ''}`}>
                           {pnlLoading && !pnlData && (

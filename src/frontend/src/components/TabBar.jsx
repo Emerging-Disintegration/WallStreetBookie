@@ -1,11 +1,11 @@
 // Tab navigation bar
 const TABS = [
-  { id: 'scanner', label: 'SCANNER' },
-  { id: 'active', label: 'MOST ACTIVE CHAINS' },
-  { id: 'watchlist', label: 'WATCHLIST' },
+  { id: 'scanner', label: 'SCANNER', labelMobile: 'SCANNER' },
+  { id: 'active', label: 'MOST ACTIVE CHAINS', labelMobile: 'MOST ACTIVE' },
+  { id: 'watchlist', label: 'WATCHLIST', labelMobile: 'WATCHLIST' },
 ];
 
-export default function TabBar({ activeTab, onTabChange }) {
+export default function TabBar({ activeTab, onTabChange, isMobile }) {
   return (
     <nav className="tab-bar" role="tablist" aria-label="Main navigation">
       {TABS.map((tab) => (
@@ -16,7 +16,7 @@ export default function TabBar({ activeTab, onTabChange }) {
           className={`tab-btn${activeTab === tab.id ? ' active' : ''}`}
           onClick={() => onTabChange(tab.id)}
         >
-          {tab.label}
+          {isMobile ? tab.labelMobile : tab.label}
         </button>
       ))}
     </nav>

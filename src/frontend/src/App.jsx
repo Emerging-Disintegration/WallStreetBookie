@@ -14,6 +14,7 @@ import Settings from './components/Settings';
 function App() {
   const api = useApi();
   const [activeTab, setActiveTab] = useState('scanner');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,6 +25,14 @@ function App() {
   const [theme, setTheme] = useState('default');
   const [tickerStripSymbols, setTickerStripSymbols] = useState([]);
   const refreshTimerRef = useRef(null);
+
+  // Track mobile width for responsive layout
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 480);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Load theme on mount
   useEffect(() => {
@@ -51,7 +60,7 @@ function App() {
       if (res.success) {
         setWatchlistTickers(res.data);
       }
-    } catch (e) {
+    } catch {
       // Silent fail — watchlist will show as empty
     }
   }, [api]);
@@ -166,7 +175,7 @@ function App() {
 
         {/* Navigation + VIX */}
         <div className="tab-row">
-          <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabBar activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
           {vixData && (() => {
             const change = Number(vixData.change) || 0;
             const price = Number(vixData.price) || 0;
@@ -201,6 +210,7 @@ function App() {
               onToggleFavorite={handleToggleFavorite}
               api={api}
               expiration={expiration}
+              isMobile={isMobile}
             />
           </>
         )}

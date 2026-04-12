@@ -16,7 +16,7 @@ export default function MostActiveTable({ api, watchlistTickers = [], onToggleFa
         if (res.success) {
           setChains(res.data);
         }
-      } catch (e) {
+      } catch {
         // silently skip fetch failure
       }
       setLoading(false);

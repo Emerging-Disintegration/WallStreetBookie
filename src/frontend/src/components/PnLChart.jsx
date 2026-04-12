@@ -14,7 +14,8 @@ function formatPnL(v) {
 }
 
 // custom Y-axis tick — shifts bottom tick up to avoid X-axis collision
-const CustomYAxisTick = ({ x, y, payload, index }) => {
+const CustomYAxisTick = ({ x, y, payload, index, ...props }) => {
+  const fontSize = props.fontSize || 11;
   const offsetY = index === 0 ? -10 : 0;
   return (
     <text
@@ -22,7 +23,7 @@ const CustomYAxisTick = ({ x, y, payload, index }) => {
       y={y + offsetY}
       textAnchor="end"
       fill="#777"
-      fontSize={11}
+      fontSize={fontSize}
       fontFamily="Fira Code, monospace"
     >
       {formatPnL(payload.value)}
@@ -31,14 +32,15 @@ const CustomYAxisTick = ({ x, y, payload, index }) => {
 };
 
 // custom X-axis tick
-const CustomXAxisTick = ({ x, y, payload }) => {
+const CustomXAxisTick = ({ x, y, payload, ...props }) => {
+  const fontSize = props.fontSize || 11;
   return (
     <text
       x={x}
       y={y}
       textAnchor="middle"
       fill="#777"
-      fontSize={11}
+      fontSize={fontSize}
       fontFamily="Fira Code, monospace"
     >
       {`$${Math.round(payload.value)}`}
@@ -100,12 +102,16 @@ export default function PnLChart({
   const [sliderPos, setSliderPos] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 480);
   const trailingRef = useRef(null);
   const lastCallRef = useRef(0);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 480);
+    window.addEventListener('resize', handleResize);
     return () => {
       if (trailingRef.current) clearTimeout(trailingRef.current);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -151,8 +157,6 @@ export default function PnLChart({
   }, [onDteChange, maxDte]);
 
   if (!pnlData || pnlData.length === 0) return null;
-
-  const prices = pnlData.map(d => d.price);
 
   const ticks = niceTickValues(pnlData);
 
@@ -204,10 +208,10 @@ export default function PnLChart({
       </div>
 
       <div className="pnl-chart-body" style={{ display: 'flex', justifyContent: 'center' }}>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={isMobile ? 140 : 250}>
         <AreaChart
           data={pnlData}
-          margin={{ top: 30, right: 20, bottom: 45, left: 20 }}
+          margin={isMobile ? { top: 5, right: 5, bottom: 12, left: 5 } : { top: 30, right: 20, bottom: 45, left: 20 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -226,21 +230,22 @@ export default function PnLChart({
             dataKey="price"
             type="number"
             domain={['dataMin', 'dataMax']}
-            tick={<CustomXAxisTick />}
+            tick={<CustomXAxisTick fontSize={isMobile ? 10 : 11} />}
             axisLine={false}
             tickLine={false}
             ticks={ticks}
             interval={0}
-            label={{ value: 'Stock Price', position: 'insideBottom', offset: -5, fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
+            minTickGap={20}
+            label={isMobile ? null : { value: 'Stock Price', position: 'insideBottom', offset: -5, fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
           />
           <YAxis
-            tick={<CustomYAxisTick />}
+            tick={<CustomYAxisTick fontSize={isMobile ? 10 : 11} />}
             axisLine={false}
             tickLine={false}
-            width={100}
+            width={isMobile ? 45 : 100}
             domain={['auto', 'auto']}
             ticks={yTicks}
-            label={{ value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -40 }}
+            label={isMobile ? null : { value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -40 }}
           />
           <Area
             type="linear"
@@ -252,20 +257,20 @@ export default function PnLChart({
             activeDot={{ r: 8, fill: '#fff', strokeWidth: 0 }}
             isAnimationActive={false}
           />
-          {/* breakeven line at P/L = 0 */}
+            {/* breakeven line at P/L = 0 */}
           <ReferenceLine
             y={0}
             stroke="var(--yellow, #ffbe0b)"
             strokeDasharray="6 4"
             strokeWidth={1}
-            label={{ value: 'Breakeven', position: 'insideTopRight', fill: '#ffbe0b', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
+            label={isMobile ? undefined : { value: 'Breakeven', position: 'insideTopRight', fill: '#ffbe0b', fontFamily: 'Fira Code, monospace', fontSize: 11 }}
           />
           {/* strike price */}
           <ReferenceLine
             x={strike}
             stroke='#790dd870'
             strokeWidth={1}
-            label={{ value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'var(--purple)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
+            label={isMobile ? undefined : { value: `Strike: $${strike}`, position: 'insideBottomRight', fill: 'var(--purple)', fontFamily: 'Fira Code, monospace', fontSize: 10 }}
           />
           <Tooltip
             trigger="axis"
@@ -273,7 +278,7 @@ export default function PnLChart({
             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
             isAnimationActive={false}
           />
-          <Legend layout="horizontal" verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px', fontFamily: 'Fira Code, monospace', fontSize: '11px' }} />
+          {!isMobile && <Legend layout="horizontal" verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px', fontFamily: 'Fira Code, monospace', fontSize: '11px' }} />}
         </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -336,6 +341,7 @@ export default function PnLChart({
             openInterest: openInterest || 0,
             currentPrice: currentPrice
           }}
+          isMobile={isMobile}
         />
       )}
     </div>
