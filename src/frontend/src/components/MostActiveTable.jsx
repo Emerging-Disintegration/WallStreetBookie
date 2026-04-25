@@ -18,6 +18,7 @@ export default function MostActiveTable({ api, watchlistTickers = [], onToggleFa
         }
       } catch {
         // silently skip fetch failure
+        alert('Failed to load active chains. Trying again...');
       }
       setLoading(false);
     };

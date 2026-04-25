@@ -103,11 +103,19 @@ export default function PnLChart({
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 480);
+  const [containerWidth, setContainerWidth] = useState(
+    window.innerWidth < 480 ? window.innerWidth - 48 : '100%'
+  );
   const trailingRef = useRef(null);
   const lastCallRef = useRef(0);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 480);
+    const handleResize = () => {
+      const mobile = window.innerWidth < 480;
+      setIsMobile(mobile);
+      setContainerWidth(mobile ? window.innerWidth - 48 : '100%');
+    };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => {
       if (trailingRef.current) clearTimeout(trailingRef.current);
@@ -208,10 +216,10 @@ export default function PnLChart({
       </div>
 
       <div className="pnl-chart-body" style={{ display: 'flex', justifyContent: 'center' }}>
-        <ResponsiveContainer width="100%" height={isMobile ? 140 : 250}>
+        <ResponsiveContainer width={containerWidth} height={isMobile ? 95 : 250}>
         <AreaChart
           data={pnlData}
-          margin={isMobile ? { top: 5, right: 5, bottom: 12, left: 5 } : { top: 30, right: 20, bottom: 45, left: 20 }}
+          margin={isMobile ? { top: 1, right: 1, bottom: 4, left: 1 } : { top: 30, right: 20, bottom: 45, left: 20 }}
         >
           <defs>
             <linearGradient id={`stroke-${gradId}`} x1="0" y1="0" x2="0" y2="1">
@@ -230,7 +238,7 @@ export default function PnLChart({
             dataKey="price"
             type="number"
             domain={['dataMin', 'dataMax']}
-            tick={<CustomXAxisTick fontSize={isMobile ? 10 : 11} />}
+            tick={<CustomXAxisTick fontSize={isMobile ? 9 : 11} />}
             axisLine={false}
             tickLine={false}
             ticks={ticks}
@@ -242,7 +250,7 @@ export default function PnLChart({
             tick={<CustomYAxisTick fontSize={isMobile ? 10 : 11} />}
             axisLine={false}
             tickLine={false}
-            width={isMobile ? 45 : 100}
+            width={isMobile ? 40 : 100}
             domain={['auto', 'auto']}
             ticks={yTicks}
             label={isMobile ? null : { value: 'Profit/Loss', angle: -90, position: 'center', fill: 'var(--text-primary)', fontFamily: 'Fira Code, monospace', fontSize: 11, dx: -40 }}

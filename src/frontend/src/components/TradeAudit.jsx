@@ -31,6 +31,7 @@ export default function TradeAudit({ api, tradeParams, isMobile }) {
   const [audit, setAudit] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState(!isMobile); // collapsed by default on mobile
 
   const containerClass = isMobile ? 'trade-audit-panel trade-audit-mobile' : 'trade-audit-panel';
 
@@ -56,6 +57,7 @@ export default function TradeAudit({ api, tradeParams, isMobile }) {
       );
       if (resp.success) {
         setAudit(resp.data);
+        if (isMobile) setExpanded(true);
       } else {
         setError(resp.error);
       }
@@ -67,7 +69,13 @@ export default function TradeAudit({ api, tradeParams, isMobile }) {
 
   return (
     <div className={containerClass}>
-      {!audit && !loading && (
+      {isMobile && !expanded && !audit && !loading && (
+        <button className="audit-btn audit-btn-compact" onClick={() => setExpanded(true)} disabled={loading}>
+          Risk Analysis 
+        </button>
+      )}
+
+      {(!isMobile || expanded) && !audit && !loading && (
         <button className="audit-btn" onClick={runAudit} disabled={loading}>
           Risk Analysis 
         </button>

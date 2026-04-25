@@ -6,7 +6,8 @@ import webview
 import yfinance as yf
 from util.scan import result_chain, get_t, r as risk_free_rate
 from util.stock_info import get_current_price, get_percent_change, get_option_stats
-from util.chains import most_active_stock_chains, most_active_etf_chains
+from util.most_active_stocks import most_active_stock_chains
+from util.most_active_etfs import most_active_etf_chains
 from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
 from util.settings import SettingsManager
