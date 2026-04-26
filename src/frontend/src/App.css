@@ -1278,16 +1278,43 @@ td.fav-cell, td.col-star {
   }
   .trade-audit-mobile .audit-results {
     gap: 4px;
+    max-height: 140px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+  }
+  .trade-audit-mobile .audit-results::-webkit-scrollbar {
+    width: 3px;
+  }
+  .trade-audit-mobile .audit-results::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
   }
   .trade-audit-mobile .audit-overall {
     padding: 3px 6px;
+    text-align: left;
   }
   .trade-audit-mobile .audit-badge {
     padding: 3px 6px;
     font-size: 0.6rem;
+    flex-wrap: wrap;
+    background: transparent !important;
+    gap: 4px;
   }
   .trade-audit-mobile .audit-badge-icon {
     font-size: 0.7rem;
+  }
+  .trade-audit-mobile .audit-badge-label {
+    min-width: 0 !important;
+  }
+  .trade-audit-mobile .audit-badge-note {
+    width: 100%;
+    padding-left: 1.2rem;
+    box-sizing: border-box;
+    font-size: 0.6rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: normal;
   }
   /* Settings overlay mobile fix */
   .settings-overlay {
