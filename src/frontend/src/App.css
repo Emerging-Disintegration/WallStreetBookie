@@ -730,18 +730,18 @@ table td:first-child {
   position: sticky;
   left: 0;
   z-index: 10;
-  background: var(--surface-solid);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 table th:nth-child(2),
 table td:nth-child(2) {
   position: sticky;
   left: 40px;
   z-index: 10;
-  background: var(--surface-solid);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* Ensure the header sticky columns have correct z-index */
@@ -1001,7 +1001,7 @@ th.fav-header, th.col-star {
   padding: 10px 8px;
   text-align: center;
   vertical-align: middle;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 td.fav-cell, td.col-star {
   width: 40px;
@@ -1084,16 +1084,16 @@ td.fav-cell, td.col-star {
   .type-row .toggle-group { justify-self: start; }
   .toggle-group { gap: 1px; }
   .toggle-btn { padding: 5px 14px; font-size: 0.75rem; }
-  .ticker-symbol { font-size: 1.25rem; }
+  .ticker-symbol { font-size: 1.4rem; }
   .ticker-item { padding: 8px 10px; }
-  .ticker-price { font-size: 0.9rem; }
-  .ticker-change { font-size: 0.75rem; }
+  .ticker-price { font-size: 1.0rem; }
+  .ticker-change { font-size: 0.85rem; }
   /* Reduce ticker glow on mobile */
   .ticker-item.up::before {
-    background: radial-gradient(ellipse at center, rgba(0,255,136,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(0,255,136,0.07) 0%, transparent 70%);
   }
   .ticker-item.down::before {
-    background: radial-gradient(ellipse at center, rgba(255,0,110,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(255,0,110,0.07) 0%, transparent 70%);
   }
   .logo { font-size: 1.4rem; }
   .header { padding-top: calc(16px + var(--safe-area-top)); }
@@ -1315,6 +1315,19 @@ td.fav-cell, td.col-star {
     line-height: 1.4;
     word-wrap: break-word;
     white-space: normal;
+  }
+  /* Sticky % Gain column on the right for mobile */
+  table th:nth-child(11),
+  table td:nth-child(11) {
+    position: sticky;
+    right: 0;
+    z-index: 10;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  table thead th:nth-child(11) {
+    z-index: 20;
   }
   /* Settings overlay mobile fix */
   .settings-overlay {
