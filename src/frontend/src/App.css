@@ -1136,7 +1136,7 @@ td.fav-cell, td.col-star {
     padding: 2px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
   }
   .pnl-chart-body {
     overflow-x: hidden !important;
@@ -1166,10 +1166,10 @@ td.fav-cell, td.col-star {
   .pnl-chart-title { font-size: 0.85rem; }
   .pnl-chart-subtitle { font-size: 0.65rem; }
   .pnl-metrics {
-    gap: 0 !important;
+    gap: 5px !important;
     flex-direction: column;
     align-items: center;
-    padding: 0 !important;
+    padding: 4px 0 !important;
     margin: 0 !important;
     border-bottom: none !important;
     justify-content: flex-start !important;
@@ -1178,24 +1178,24 @@ td.fav-cell, td.col-star {
     gap: 2px;
     line-height: 1 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 1px 0 !important;
     height: auto !important;
     min-height: 0 !important;
     display: flex;
     flex-direction: row;
     align-items: baseline;
   }
-  .pnl-metric-label { font-size: 0.45rem; }
-  .pnl-metric-value { font-size: 0.6rem; }
+  .pnl-metric-label { font-size: 0.55rem; }
+  .pnl-metric-value { font-size: 0.75rem; }
   .pnl-chart-container.open { min-height: auto; }
   .pnl-sliders {
     gap: 0;
     margin: 0;
-    padding: 2px 0;
+    padding: 0;
     width: 100%;
   }
   .pnl-slider-row {
-    padding: 4px 4px;
+    padding: 4px 10px;
     margin: 0;
     display: flex;
     align-items: center;
@@ -1205,8 +1205,9 @@ td.fav-cell, td.col-star {
   .pnl-slider {
     flex: 1;
     height: 6px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: 3px;
+    margin: 0 6px;
   }
   .pnl-slider::-webkit-slider-thumb {
     width: 14px;
@@ -1228,26 +1229,29 @@ td.fav-cell, td.col-star {
   }
   /* Mobile chart row - horizontal sticky + removes sticky column inheritance */
   .pnl-chart-row-mobile {
-    position: sticky;
-    top: 0;
-    z-index: 50;
     background: var(--surface);
   }
   .pnl-chart-row-mobile td.pnl-chart-cell {
     position: static !important;
     left: auto !important;
     z-index: 1 !important;
-    background: var(--surface) !important;
+    overflow: visible !important;
+    background: transparent !important;
     backdrop-filter: none !important;
-    width: calc(100vw - 48px) !important;
-    min-width: 0 !important;
-    max-width: calc(100vw - 48px) !important;
     padding: 0 !important;
     text-align: center;
   }
+  .pnl-chart-sticky-wrapper {
+    position: sticky;
+    left: 0;
+    width: calc(100vw - 24px);
+    z-index: 100;
+    background: var(--surface);
+  }
   .pnl-chart-row-mobile .pnl-chart-container {
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
   }
   /* Force override base min-height: 420px */
   .pnl-chart-row-mobile .pnl-chart-container.open {
@@ -1256,8 +1260,8 @@ td.fav-cell, td.col-star {
   }
   /* TradeAudit compact styles for mobile */
   .trade-audit-mobile {
-    padding: 6px 0;
-    margin-top: 6px;
+    padding: 2px 0;
+    margin-top: 2px;
   }
   .trade-audit-mobile .audit-btn {
     font-size: 0.65rem;

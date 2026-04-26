@@ -200,27 +200,29 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
                   {isExpanded && (
                     <tr className={`pnl-chart-row pnl-chart-row-expanded${isMobile ? ' pnl-chart-row-mobile' : ''}`} ref={chartRowRef}>
                       <td colSpan={COL_COUNT} className="pnl-chart-cell">
-                        <div className={`pnl-chart-container${pnlData || pnlLoading ? ' open' : ''}`}>
-                          {pnlLoading && !pnlData && (
-                            <div className="pnl-loading">Calculating contract value...</div>
-                          )}
-                          {pnlData && (
-                            <PnLChart
-                              data={pnlData.points}
-                              currentPrice={pnlData.currentPrice}
-                              premium={parseFloat(row.ask || row.Ask)}
-                              optionType={row.side || row.Side}
-                              ticker={row.ticker || row.Ticker}
-                              strike={parseFloat(row.strike || row.Strike)}
-                              maxDte={maxDte}
-                              onDteChange={handleDteChange}
-                              api={api}
-                              bid={parseFloat(row.bid || row.Bid || 0)}
-                              volume={parseInt(row.volume || row.Volume || 0)}
-                              openInterest={parseInt(row.openInterest || row.OI || 0)}
-                              iv={getRowIv(row)}
-                            />
-                          )}
+                        <div className="pnl-chart-sticky-wrapper">
+                          <div className={`pnl-chart-container${pnlData || pnlLoading ? ' open' : ''}`}>
+                            {pnlLoading && !pnlData && (
+                              <div className="pnl-loading">Calculating contract value...</div>
+                            )}
+                            {pnlData && (
+                              <PnLChart
+                                data={pnlData.points}
+                                currentPrice={pnlData.currentPrice}
+                                premium={parseFloat(row.ask || row.Ask)}
+                                optionType={row.side || row.Side}
+                                ticker={row.ticker || row.Ticker}
+                                strike={parseFloat(row.strike || row.Strike)}
+                                maxDte={maxDte}
+                                onDteChange={handleDteChange}
+                                api={api}
+                                bid={parseFloat(row.bid || row.Bid || 0)}
+                                volume={parseInt(row.volume || row.Volume || 0)}
+                                openInterest={parseInt(row.openInterest || row.OI || 0)}
+                                iv={getRowIv(row)}
+                              />
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
