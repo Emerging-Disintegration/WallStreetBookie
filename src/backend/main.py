@@ -133,13 +133,14 @@ def main():
         title='WallStreetBookie',
         url=entry,
         js_api=api,
+        # Default size
         # width=1200,
         # height=850,
+        # Mobile size
         width=450,
         height=800,
         resizable=True,
         frameless=True,
-        # min_size=(538, 1)
     )
     api.set_window(window)
 
