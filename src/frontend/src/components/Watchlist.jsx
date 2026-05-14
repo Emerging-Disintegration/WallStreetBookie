@@ -1,5 +1,5 @@
 // Watchlist tab — shows saved tickers with price, change, and remove functionality
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import GlowCard from './GlowCard';
 import ToggleGroup from './ToggleGroup';
 import TagFilter from './TagFilter';
@@ -7,57 +7,61 @@ import TagEditor from './TagEditor';
 
 const RANGES = ['1D', '5D', '1M', '6M', 'YTD', '1Y'];
 
-export default function Watchlist({ tickers, onToggleFavorite, api }) {
-  const [localTickers, setLocalTickers] = useState(null);
-  const [range, setRange] = useState('1D');
-  const rangeRef = useRef('1D');
+export default function Watchlist({ tickers, onToggleFavorite, api, range: propRange, onRangeChange }) {
+  const [range, setRange] = useState(propRange || '1D');
+  const rangeRef = useRef(range);
   const [removing, setRemoving] = useState({});
-  const [error, setError] = useState(null);
-  const [rangeLoading, setRangeLoading] = useState(false);
+  const [error] = useState(null);
   const [sortDirection, setSortDirection] = useState('off');
   const [activeTag, setActiveTag] = useState(null);
   const [editingTagsFor, setEditingTagsFor] = useState(null);
+  const debounceTimerRef = useRef(null);
 
-  const fetchWithRange = useCallback(async (r) => {
-    if (!api) return;
-    setRangeLoading(true);
-    try {
-      const res = await api.get_watchlist_with_prices(r);
-      if (res.success) setLocalTickers(res.data);
-    } catch {
-      // silently fail
-    }
-    setRangeLoading(false);
-  }, [api]);
-
-  // Re-fetch when parent signals a change (add/remove from another tab)
+  // Auto-refresh for 1D range every 2 minutes
   useEffect(() => {
-    if (tickers !== null) {
-      fetchWithRange(rangeRef.current);
-    }
-  }, [tickers, fetchWithRange]);
+    if (range !== '1D') return;
+    const interval = setInterval(() => {
+      onRangeChange('1D', true);
+    }, 120_000);
+    return () => clearInterval(interval);
+  }, [range, onRangeChange]);
 
   const handleRangeChange = (r) => {
     setRange(r);
     rangeRef.current = r;
-    fetchWithRange(r);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      onRangeChange(r);
+    }, 200);
   };
 
   const handleRemove = async (symbol) => {
     if (removing[symbol]) return;
     setRemoving((prev) => ({ ...prev, [symbol]: true }));
-    setError(null);
+    // Optimistic remove
+    if (onToggleFavorite) {
+      onToggleFavorite(symbol, false);
+    }
     try {
-      const res = await api.remove_favorite(symbol);
-      if (res.success && onToggleFavorite) {
-        onToggleFavorite(symbol, false);
-      } else {
-        setError(`Failed to remove ${symbol} from watchlist`);
-      }
+      await api.remove_favorite(symbol);
     } catch {
-      setError(`Failed to remove ${symbol} from watchlist`);
+      // Revert on failure
+      if (onToggleFavorite) {
+        onToggleFavorite(symbol, true);
+      }
     }
     setRemoving((prev) => ({ ...prev, [symbol]: false }));
+  };
+
+  const handleRetry = async (symbol) => {
+    try {
+      const res = await api.get_stock_card_data(symbol);
+      if (res.success) {
+        onRangeChange(rangeRef.current, true);
+      }
+    } catch {
+      // Silent fail
+    }
   };
 
   const formatDate = (isoString) => {
@@ -67,19 +71,17 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const displayTickers = localTickers ?? tickers;
-
   const allTags = useMemo(() => {
-    if (!displayTickers) return [];
+    if (!tickers) return [];
     const tagSet = new Set();
-    displayTickers.forEach(t => (t.tags || []).forEach(tag => tagSet.add(tag)));
+    tickers.forEach(t => (t.tags || []).forEach(tag => tagSet.add(tag)));
     return [...tagSet].sort();
-  }, [displayTickers]);
+  }, [tickers]);
 
   // Filter by tag first, then sort by % change
   const displayList = useMemo(() => {
-    if (!displayTickers) return [];
-    let list = [...displayTickers];
+    if (!tickers) return [];
+    let list = [...tickers];
     if (activeTag) {
       list = list.filter(t => (t.tags || []).includes(activeTag));
     }
@@ -89,9 +91,9 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
       const bVal = b.change ?? 0;
       return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
     });
-  }, [displayTickers, activeTag, sortDirection]);
+  }, [tickers, activeTag, sortDirection]);
 
-  if (!displayTickers) {
+  if (!tickers) {
     return (
       <GlowCard className="watchlist-card">
         <div className="loading">Loading watchlist...</div>
@@ -103,7 +105,7 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
     <>
       {error && <div className="error-banner" role="alert">{error}</div>}
       <GlowCard className="watchlist-card">
-        {displayTickers.length === 0 ? (
+        {tickers.length === 0 ? (
           <div className="watchlist-empty">
             <div className="watchlist-empty-icon">&#9734;</div>
             <div className="watchlist-empty-title">No tickers saved yet</div>
@@ -135,27 +137,43 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
                 {sortDirection === 'off' ? '↕' : sortDirection === 'desc' ? '↓' : '↑'}
               </button>
               <span className="watchlist-count">
-                {displayTickers.length} ticker{displayTickers.length !== 1 ? 's' : ''}
+                {tickers.length} ticker{tickers.length !== 1 ? 's' : ''}
               </span>
             </div>
             <TagFilter tags={allTags} activeTag={activeTag} onTagSelect={setActiveTag} />
-            <ul className={`watchlist-list${rangeLoading ? ' loading-dim' : ''}`}>
+            <ul className="watchlist-list">
               {displayList.map((item) => (
                 <li
                   key={item.symbol}
-                  className={`watchlist-item${removing[item.symbol] ? ' removing' : ''}`}
+                  className={`watchlist-item${removing[item.symbol] ? ' removing' : ''}${item._failed ? ' watchlist-failed' : ''}`}
                 >
                   <div className="watchlist-item-left">
                     <span className="watchlist-symbol">{item.symbol}</span>
-                    {item.price != null && (
-                      <span className="watchlist-price mono">
-                        ${Number(item.price).toFixed(2)}
-                      </span>
-                    )}
-                    {item.change != null && (
-                      <span className={`watchlist-change mono ${item.change >= 0 ? 'positive' : 'negative'}`}>
-                        {item.change >= 0 ? '+' : ''}{Number(item.change).toFixed(2)}%
-                      </span>
+                    {item._failed ? (
+                      <>
+                        <span className="watchlist-price mono">—</span>
+                        <span className="watchlist-change mono">—</span>
+                        <button
+                          className="watchlist-retry"
+                          onClick={() => handleRetry(item.symbol)}
+                          title="Retry loading ticker"
+                        >
+                          ↻ Retry
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {item.price != null && (
+                          <span className="watchlist-price mono">
+                            ${Number(item.price).toFixed(2)}
+                          </span>
+                        )}
+                        {item.change != null && (
+                          <span className={`watchlist-change mono ${item.change >= 0 ? 'positive' : 'negative'}`}>
+                            {item.change >= 0 ? '+' : ''}{Number(item.change).toFixed(2)}%
+                          </span>
+                        )}
+                      </>
                     )}
                     {item.tags && item.tags.length > 0 && (
                       <span className="watchlist-tags">
@@ -182,7 +200,7 @@ export default function Watchlist({ tickers, onToggleFavorite, api }) {
                         onSave={async (newTags) => {
                           await api.set_ticker_tags(item.symbol, newTags);
                           setEditingTagsFor(null);
-                          fetchWithRange(rangeRef.current);
+                          onRangeChange(rangeRef.current, true);
                         }}
                         onClose={() => setEditingTagsFor(null)}
                       />

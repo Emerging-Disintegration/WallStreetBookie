@@ -804,6 +804,65 @@ th.col-rank, td.col-rank { text-align: center; }
   outline-offset: 2px;
 }
 
+/* ─── Flow View ─── */
+.flow-card { margin-bottom: 24px; }
+.flow-subtab-bar {
+  display: flex;
+  gap: 0;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--border);
+}
+.flow-subtab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: var(--sans);
+}
+.flow-subtab-btn:hover { color: var(--text-primary); }
+.flow-subtab-btn.active {
+  border-bottom-color: var(--green);
+  color: var(--green);
+}
+.flow-content { padding-bottom: 8px; }
+.flow-contract {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.flow-ratio {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.flow-last-updated {
+  padding: 6px 28px 0;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 480px) {
+  .flow-subtab-btn {
+    padding: 8px 10px;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+  }
+  .flow-subtab-bar {
+    padding: 0 12px;
+  }
+  .flow-last-updated {
+    padding: 6px 12px 0;
+  }
+}
+
 /* ─── Loading & Error ─── */
 .loading {
   text-align: center;
@@ -2166,3 +2225,25 @@ tbody tr.expanded { background: rgba(0, 255, 136, 0.05); }
   align-self: flex-start;
   margin-top: 4px;
 }
+
+/* Watchlist retry button for failed tickers */
+.watchlist-retry {
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.watchlist-retry:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+.watchlist-failed .watchlist-price,
+.watchlist-failed .watchlist-change {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+

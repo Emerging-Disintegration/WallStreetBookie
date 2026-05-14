@@ -6,7 +6,7 @@ import TickerStrip from './components/TickerStrip';
 import TabBar from './components/TabBar';
 import ProfitCalculator from './components/ProfitCalculator';
 import ResultsTable from './components/ResultsTable';
-import MostActiveTable from './components/MostActiveTable';
+import FlowView from './components/FlowView';
 import Watchlist from './components/Watchlist';
 import TitleBar from './components/TitleBar';
 import Settings from './components/Settings';
@@ -24,7 +24,18 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState('default');
   const [tickerStripSymbols, setTickerStripSymbols] = useState([]);
+  const [watchlistRange, setWatchlistRange] = useState('1D');
   const refreshTimerRef = useRef(null);
+
+  // Flow tab session cache — survives tab switches since App never unmounts
+  const flowCacheRef = useRef({
+    stocks: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
+    etfs: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
+    unusual: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
+  });
+  // Watchlist session cache per range — survives tab switches
+  const watchlistCacheRef = useRef({});
+  const [activeFlowSubTab, setActiveFlowSubTab] = useState('stocks');
 
   // Track mobile width for responsive layout
   useEffect(() => {
@@ -53,25 +64,42 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const refreshWatchlist = useCallback(async () => {
+  const refreshWatchlist = useCallback(async (range = '1D', force = false) => {
     if (!api) return;
+    const cache = watchlistCacheRef.current[range];
+    const ttl = range === '1D' ? 60_000 : 300_000; // 1min / 5min
+
+    // Use cache if fresh
+    if (!force && cache && Date.now() - cache.timestamp < ttl) {
+      setWatchlistTickers(cache.data);
+      return;
+    }
+
     try {
-      const res = await api.get_watchlist_with_prices();
+      const res = await api.get_watchlist_with_prices(range);
       if (res.success) {
+        watchlistCacheRef.current[range] = {
+          data: res.data,
+          timestamp: Date.now()
+        };
         setWatchlistTickers(res.data);
       }
     } catch {
-      // Silent fail — watchlist will show as empty
+      // Silent fail
     }
   }, [api]);
+
+  const handleWatchlistRangeChange = useCallback((range, force) => {
+    setWatchlistRange(range);
+    refreshWatchlist(range, force);
+  }, [refreshWatchlist]);
 
   const scheduleDebouncedRefresh = useCallback(() => {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     refreshTimerRef.current = setTimeout(() => {
-      refreshWatchlist();
-       
+      refreshWatchlist(watchlistRange);
     }, 300);
-  }, [refreshWatchlist]);
+  }, [refreshWatchlist, watchlistRange]);
 
   const handleToggleFavorite = useCallback((symbol, isAdding) => {
     if (isAdding) {
@@ -79,12 +107,14 @@ function App() {
     } else {
       setWatchlistTickers(prev => prev.filter(t => t.symbol !== symbol));
     }
+    // Invalidate all watchlist caches on add/remove
+    watchlistCacheRef.current = {};
     scheduleDebouncedRefresh();
   }, [scheduleDebouncedRefresh]);
 
   // Fetch watchlist on app mount
   useEffect(() => {
-    refreshWatchlist();
+    refreshWatchlist('1D');
   }, [refreshWatchlist]);
 
   const handleSearch = async ({ mode, ticker, expiration, targetGain, optionType }) => {
@@ -215,9 +245,17 @@ function App() {
           </>
         )}
 
-        {/* Most Active tab */}
-        {activeTab === 'active' && (
-          <MostActiveTable api={api} watchlistTickers={watchlistTickers} onToggleFavorite={handleToggleFavorite} />
+        {/* Flow tab */}
+        {activeTab === 'flow' && (
+          <FlowView
+            api={api}
+            watchlistTickers={watchlistTickers}
+            onToggleFavorite={handleToggleFavorite}
+            isMobile={isMobile}
+            flowCacheRef={flowCacheRef}
+            activeSubTab={activeFlowSubTab}
+            onSubTabChange={setActiveFlowSubTab}
+          />
         )}
 
         {/* Watchlist tab */}
@@ -226,6 +264,8 @@ function App() {
             tickers={watchlistTickers}
             onToggleFavorite={handleToggleFavorite}
             api={api}
+            range={watchlistRange}
+            onRangeChange={handleWatchlistRangeChange}
           />
         )}
       </main>

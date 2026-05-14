@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
-  CartesianGrid, ReferenceLine, Tooltip, Legend
+  CartesianGrid, ReferenceLine, Tooltip
 } from 'recharts';
 import TradeAudit from './TradeAudit';
 
@@ -286,7 +286,7 @@ export default function PnLChart({
             cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
             isAnimationActive={false}
           />
-          {!isMobile && <Legend layout="horizontal" verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px', fontFamily: 'Fira Code, monospace', fontSize: '11px' }} />}
+
         </AreaChart>
         </ResponsiveContainer>
       </div>

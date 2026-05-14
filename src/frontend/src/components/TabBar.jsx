@@ -1,7 +1,7 @@
 // Tab navigation bar
 const TABS = [
   { id: 'scanner', label: 'SCANNER', labelMobile: 'SCANNER' },
-  { id: 'active', label: 'MOST ACTIVE CHAINS', labelMobile: 'MOST ACTIVE' },
+  { id: 'flow', label: 'FLOW', labelMobile: 'FLOW' },
   { id: 'watchlist', label: 'WATCHLIST', labelMobile: 'WATCHLIST' },
 ];
 

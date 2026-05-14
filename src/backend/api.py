@@ -1,7 +1,8 @@
 # pywebview API bridge — exposes Python utils to the React frontend
 
+import concurrent.futures
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 import webview
 import yfinance as yf
 from util.scan import result_chain, get_t, r as risk_free_rate
@@ -12,9 +13,13 @@ from util.volume import get_call_put_volume
 from util.watchlist import WatchlistManager
 from util.settings import SettingsManager
 from util.pnl import calculate_contract_value
+from util.unusual_options_activity import options_flow
 
 # shared flag — Cocoa monkey-patch reads this to decide whether to move the window
 _drag_state = {'enabled': True}
+
+# In-memory TTL cache for percent change lookups
+_price_cache = {}  # {(symbol, range_key): {'value': change, 'expires': datetime}}
 
 
 class Api:
@@ -118,6 +123,13 @@ class Api:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def get_options_flow(self) -> dict:
+        try:
+            flow = options_flow()
+            return {"success": True, "data": flow}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def get_volume(self) -> dict:
         try:
             volume = get_call_put_volume()
@@ -205,48 +217,67 @@ class Api:
             return {"success": False, "error": str(e)}
 
     def _pct_change(self, ticker_obj, range_key: str, current_price: float):
-        # compute percent change from range start to current price
+        symbol = ticker_obj.ticker.upper()
+        cache_key = (symbol, range_key)
+        now = datetime.now()
+        cached = _price_cache.get(cache_key)
+        if cached and now < cached['expires']:
+            return cached['value']
+
+        value = None
         try:
             if range_key == '1D':
                 prev = float(ticker_obj.fast_info['regularMarketPreviousClose'])
                 if prev > 0:
-                    return round((current_price - prev) / prev * 100, 2)
-                return None
-            period_map = {
-                '5D': '5d', '1M': '1mo',
-                '6M': '6mo', 'YTD': 'ytd', '1Y': '1y'
-            }
-            period = period_map.get(range_key)
-            if not period:
-                return None
-            hist = ticker_obj.history(period=period)
-            if hist.empty:
-                return None
-            start = float(hist['Close'].iloc[0])
-            if start <= 0:
-                return None
-            return round((current_price - start) / start * 100, 2)
+                    value = round((current_price - prev) / prev * 100, 2)
+            else:
+                period_map = {
+                    '5D': '5d', '1M': '1mo',
+                    '6M': '6mo', 'YTD': 'ytd', '1Y': '1y'
+                }
+                period = period_map.get(range_key)
+                if period:
+                    hist = ticker_obj.history(period=period)
+                    if not hist.empty:
+                        start = float(hist['Close'].iloc[0])
+                        if start > 0:
+                            value = round((current_price - start) / start * 100, 2)
         except Exception:
-            return None
+            pass
 
+        if value is not None:
+            ttl = 60 if range_key == '1D' else 300
+            _price_cache[cache_key] = {'value': value, 'expires': now + timedelta(seconds=ttl)}
+        return value
+
+
+    def _enrich_ticker(self, item: dict, range_key: str) -> dict:
+        entry = dict(item)
+        entry['tags'] = item.get('tags', [])
+        try:
+            t = yf.Ticker(item['symbol'])
+            current = round(float(t.fast_info['last_price']), 2)
+            entry['price'] = current
+            entry['change'] = self._pct_change(t, range_key, current)
+            entry['_failed'] = False
+        except Exception:
+            entry['price'] = None
+            entry['change'] = None
+            entry['_failed'] = True
+        return entry
 
     def get_watchlist_with_prices(self, range_key='1D') -> dict:
-        # returns watchlist items enriched with current price and percent change
         try:
             items = self.watchlist_manager.get_all()
             enriched = []
-            for item in items:
-                entry = dict(item)
-                entry['tags'] = item.get('tags', [])
-                try:
-                    t = yf.Ticker(item['symbol'])
-                    current = round(float(t.fast_info['last_price']), 2)
-                    entry['price'] = current
-                    entry['change'] = self._pct_change(t, range_key, current)
-                except Exception:
-                    entry['price'] = None
-                    entry['change'] = None
-                enriched.append(entry)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+                future_to_item = {
+                    executor.submit(self._enrich_ticker, item, range_key): item
+                    for item in items
+                }
+                for future in concurrent.futures.as_completed(future_to_item):
+                    result = future.result()
+                    enriched.append(result)
             return {"success": True, "data": enriched}
         except Exception as e:
             return {"success": False, "error": str(e)}
