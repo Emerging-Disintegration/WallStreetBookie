@@ -677,6 +677,33 @@ body::after {
   font-size: 0.75rem;
   color: var(--purple);
   font-weight: 700;
+  margin-left: auto;  /* right-align regardless of sibling count */
+}
+
+.expected-move {
+  font-size: 0.75rem;
+  color: var(--yellow);
+  font-weight: 600;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
+.expected-move-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.expected-move-line { line-height: 1.3; }
+.expected-move-sep {
+  color: var(--text-muted);
+  margin: 0 4px;
+}
+
+@media (max-width: 480px) {
+  .expected-move { font-size: 0.65rem; flex-direction: column; gap: 2px; }
+  .expected-move-label { font-size: 0.6rem; }
 }
 
 table {

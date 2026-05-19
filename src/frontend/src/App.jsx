@@ -25,6 +25,7 @@ function App() {
   const [theme, setTheme] = useState('default');
   const [tickerStripSymbols, setTickerStripSymbols] = useState([]);
   const [watchlistRange, setWatchlistRange] = useState('1D');
+  const [expectedMove, setExpectedMove] = useState(null);
   const refreshTimerRef = useRef(null);
 
   // Flow tab session cache — survives tab switches since App never unmounts
@@ -124,6 +125,7 @@ function App() {
     setLoading(true);
     setError(null);
     setResults([]);
+    setExpectedMove(null);
     setExpiration(expiration);
 
     try {
@@ -131,6 +133,7 @@ function App() {
         const res = await api.search_options(ticker, expiration, targetGain, optionType);
         if (res.success) {
           setResults(res.data);
+          setExpectedMove(res.expectedMove ?? null);
         } else {
           setError(res.error);
         }
@@ -242,6 +245,7 @@ function App() {
               api={api}
               expiration={expiration}
               isMobile={isMobile}
+              expectedMove={expectedMove}
             />
           </>
         )}

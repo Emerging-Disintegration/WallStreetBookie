@@ -4,6 +4,8 @@ import yfinance as yf
 from scipy.stats import norm
 from datetime import datetime, time, timedelta, timezone
 from util.yahoo_fin_options import get_options_chain
+import math
+from util.stock_info import get_current_price
 
 
 def get_r() -> float:
@@ -143,6 +145,19 @@ def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
     df.insert(loc=0, column='Ticker', value=f'{stock}')
     df = df[['Ticker', 'Strike', 'Last Price', 'Bid', 'Ask', 'Change', 'Volume', 'Open Interest', 'side', 'iv']]
     df = df[df['iv'] > 0]
+    df.reset_index(drop=True, inplace=True)
+
+    # Capture expected move from ATM IV before row filtering removes it
+    expected_move = None
+    try:
+        price = float(get_current_price(stock))
+        atm_idx = (df['Strike'] - price).abs().idxmin()
+        atm_iv = float(df.loc[atm_idx, 'iv'])
+        em1 = round(price * atm_iv * math.sqrt(T), 2)
+        expected_move = {"oneSd": em1, "twoSd": round(em1 * 2, 2), "price": round(price, 2)}
+    except (ValueError, KeyError, TypeError):
+        expected_move = None
+
     df['t'] = T
 
     # Calculate in-the-money premium for each option
@@ -177,6 +192,6 @@ def result_chain(stock, percent_gain, exp, opt_side = 'Any' ):
             'inTheMoneyPrice': 'ITM Price',
             'percentGain': '% Gain'
         }, inplace=True)
-    return df
+    return df, expected_move
 
 

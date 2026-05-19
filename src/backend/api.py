@@ -56,8 +56,8 @@ class Api:
         try:
             # Convert frontend date format (YYYY-MM-DD) to backend format (MM/DD/YYYY)
             expiration = datetime.strptime(expiration, '%Y-%m-%d').strftime('%m/%d/%Y')
-            df = result_chain(ticker, desired_gain, expiration, option_type)
-            return {"success": True, "data": df.to_dict('records')}
+            df, expected_move = result_chain(ticker, desired_gain, expiration, option_type)
+            return {"success": True, "data": df.to_dict('records'), "expectedMove": expected_move}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

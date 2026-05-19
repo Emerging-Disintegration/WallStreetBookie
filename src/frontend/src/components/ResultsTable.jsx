@@ -3,7 +3,7 @@ import { useState, useRef, Fragment, useEffect } from 'react';
 import GlowCard from './GlowCard';
 import PnLChart from './PnLChart';
 
-export default function ResultsTable({ results, watchlistTickers = [], onToggleFavorite, api, expiration, isMobile }) {
+export default function ResultsTable({ results, watchlistTickers = [], onToggleFavorite, api, expiration, isMobile, expectedMove = null }) {
   const [togglingTickers, setTogglingTickers] = useState({});
   const [expandedRow, setExpandedRow] = useState(null);
   const [pnlData, setPnlData] = useState(null);
@@ -139,6 +139,16 @@ export default function ResultsTable({ results, watchlistTickers = [], onToggleF
     <h2 className="results-title">RESULTS</h2>
     <GlowCard className="results-card">
       <div className="results-header">
+        {expectedMove && (
+          <span className="expected-move">
+            <span className="expected-move-label">Exp Move:</span>
+            <span className="expected-move-line">
+              1SD ±${expectedMove.oneSd} ({((expectedMove.oneSd / expectedMove.price) * 100).toFixed(1)}%)
+              <span className="expected-move-sep">·</span>
+              2SD ±${expectedMove.twoSd} ({((expectedMove.twoSd / expectedMove.price) * 100).toFixed(1)}%)
+            </span>
+          </span>
+        )}
         <span className="results-count">
           {results.length} contract{results.length !== 1 ? 's' : ''} found
         </span>
