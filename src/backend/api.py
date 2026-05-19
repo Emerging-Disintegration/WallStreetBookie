@@ -14,6 +14,7 @@ from util.watchlist import WatchlistManager
 from util.settings import SettingsManager
 from util.pnl import calculate_contract_value
 from util.unusual_options_activity import options_flow
+from util.reddit_sentiment import get_sentiment
 
 # shared flag — Cocoa monkey-patch reads this to decide whether to move the window
 _drag_state = {'enabled': True}
@@ -127,6 +128,13 @@ class Api:
         try:
             flow = options_flow()
             return {"success": True, "data": flow}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_sentiment(self) -> dict:
+        try:
+            data = get_sentiment()
+            return {"success": True, "data": data}
         except Exception as e:
             return {"success": False, "error": str(e)}
 

@@ -6,6 +6,7 @@ const SUB_TABS = [
   { id: 'stocks', label: 'Stock Options' },
   { id: 'etfs', label: 'ETF Options' },
   { id: 'unusual', label: 'Unusual Activity' },
+  { id: 'sentiment', label: 'Sentiment' },
 ];
 
 export default function FlowView({ api, watchlistTickers = [], onToggleFavorite, isMobile, flowCacheRef, activeSubTab, onSubTabChange }) {
@@ -56,6 +57,8 @@ export default function FlowView({ api, watchlistTickers = [], onToggleFavorite,
           res = await api.get_active_stocks();
         } else if (tabId === 'etfs') {
           res = await api.get_active_etfs();
+        } else if (tabId === 'sentiment') {
+          res = await api.get_sentiment();
         } else {
           res = await api.get_options_flow();
         }
@@ -210,6 +213,77 @@ export default function FlowView({ api, watchlistTickers = [], onToggleFavorite,
                       </td>
                       <td className="mono">{formatVolume(item.optionVolume)}</td>
                       <td className="mono">{formatVolume(item.openInterest)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : activeSubTab === 'sentiment' ? (
+          <div className="table-scroll-container">
+            <table>
+              <caption className="sr-only">Reddit sentiment</caption>
+              <thead>
+                <tr>
+                  <th className="col-star">☆</th>
+                  <th className="col-rank">Rank</th>
+                  <th>Ticker</th>
+                  <th>Mentions</th>
+                  <th>Upvotes</th>
+                  <th>24h Δ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cache.data.map((item, i) => {
+                  const rankClass = i < 3 ? 'rank-top' : 'rank';
+                  const rankDelta = typeof item.rank_delta === 'number' ? item.rank_delta : 0;
+                  const mentionDelta =
+                    typeof item.mention_delta === 'number' ? item.mention_delta : 0;
+
+                  return (
+                    <tr key={i}>
+                      <td className="col-star">
+                        <button
+                          className={`fav-btn${isFaved(item.ticker) ? ' active' : ''}`}
+                          onClick={(e) => toggleFavorite(e, item.ticker)}
+                          aria-label={
+                            isFaved(item.ticker)
+                              ? 'Remove from watchlist'
+                              : 'Add to watchlist'
+                          }
+                        >
+                          {isFaved(item.ticker) ? '★' : '☆'}
+                        </button>
+                      </td>
+                      <td className={`${rankClass} col-rank`}>{item.rank ?? i + 1}</td>
+                      <td className="ticker">
+                        {item.ticker}
+                        {item.name && (
+                          <span className="sentiment-name">{item.name}</span>
+                        )}
+                      </td>
+                      <td className="mono">
+                        {(item.mentions ?? 0).toLocaleString()}
+                      </td>
+                      <td className="mono">
+                        {(item.upvotes ?? 0).toLocaleString()}
+                      </td>
+                      <td className="mono">
+                        <div>
+                          Rank:{' '}
+                          <span className={rankDelta >= 0 ? 'sentiment-up' : 'sentiment-down'}>
+                            {rankDelta >= 0 ? `+${rankDelta}` : rankDelta}
+                          </span>
+                        </div>
+                        <div>
+                          Mentions:{' '}
+                          <span
+                            className={mentionDelta >= 0 ? 'sentiment-up' : 'sentiment-down'}
+                          >
+                            {mentionDelta >= 0 ? `+${mentionDelta}` : mentionDelta}
+                          </span>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}

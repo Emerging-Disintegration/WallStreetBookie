@@ -849,6 +849,21 @@ th.col-rank, td.col-rank { text-align: center; }
   letter-spacing: 0.04em;
 }
 
+.sentiment-name {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.sentiment-up {
+  color: var(--green);
+  font-weight: 600;
+}
+.sentiment-down {
+  color: var(--magenta);
+  font-weight: 600;
+}
+
 @media (max-width: 480px) {
   .flow-subtab-btn {
     padding: 8px 10px;

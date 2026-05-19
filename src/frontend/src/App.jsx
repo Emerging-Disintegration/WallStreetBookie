@@ -32,6 +32,7 @@ function App() {
     stocks: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
     etfs: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
     unusual: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
+    sentiment: { data: null, loading: false, error: null, loaded: false, lastUpdated: null },
   });
   // Watchlist session cache per range — survives tab switches
   const watchlistCacheRef = useRef({});
